@@ -1,49 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PT Transkon Jaya – Fleet & Jobsheet Dashboard</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Transkon Jaya – Fleet Management Dashboard</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Font - Canva Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #f8f8f8;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .canva-card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 22px;
+        }
+
+        .section-header {
+            background: #a60000;
+            color: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .canva-btn {
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-weight: 600;
+        }
+
+        .btn-apply {
+            background: #a60000;
+            color: white;
+        }
+        .btn-reset {
+            border: 2px solid #a60000;
+            color: #a60000;
+        }
+    </style>
 </head>
 
 <body>
-    <header class="header">
-        <h1>PT Transkon Jaya – Fleet Management Dashboard</h1>
-        <p>Real-Time Asset & Jobsheet Monitoring System</p>
-    </header>
 
-    <section class="cards">
-        <div class="card" id="p1Count">P1: ...</div>
-        <div class="card" id="p2Count">P2: ...</div>
-        <div class="card" id="cashCount">Cash: ...</div>
-        <div class="card" id="repairCount">Repair: ...</div>
-        <div class="card" id="pettyCount">Petty: ...</div>
-        <div class="card" id="hoCount">Dana HO: ...</div>
-        <div class="card" id="totalCost">Total Cost: ...</div>
-    </section>
+    <!-- HEADER -->
+    <div class="section-header text-center">
+        <h1 class="text-4xl font-bold">PT Transkon Jaya – Fleet Management Dashboard</h1>
+        <p class="opacity-90 mt-2 text-lg">Real-time Asset & Jobsheet Monitoring System</p>
+    </div>
 
-    <section class="panel">
-        <h2>Jobsheet Weekly Count</h2>
-        <canvas id="weeklyChart"></canvas>
-    </section>
+    <!-- ASSET OVERVIEW -->
+    <div class="canva-card w-[95%] mx-auto mb-5">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+            🚗 ASSET OVERVIEW
+        </h2>
+        <p class="text-gray-600">Fleet asset management and distribution statistics</p>
+    </div>
 
-    <section class="panel">
-        <h2>P3 Parts Usage (Top 10)</h2>
-        <canvas id="p3Chart"></canvas>
-    </section>
+    <!-- FILTER CARD -->
+    <div class="canva-card w-[95%] mx-auto mb-6">
+        <h3 class="font-semibold mb-3 text-lg">🔍 Filter Asset Data</h3>
 
-    <section class="panel">
-        <h2>Raw Data</h2>
-        <table id="rawTable">
-            <thead id="tableHead"></thead>
+        <label class="block text-sm font-semibold mb-1">HUB LOCATION</label>
+        <select id="hubFilter" class="border rounded-lg p-3 w-full mb-4">
+            <option>All HUBs</option>
+        </select>
+
+        <div class="flex gap-3">
+            <button onclick="applyFilter()" class="canva-btn btn-apply">🔎 Apply Filter</button>
+            <button onclick="resetFilter()" class="canva-btn btn-reset">⭮ Reset</button>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 w-[95%] mx-auto mb-6">
+
+        <div class="canva-card text-center">
+            <div class="text-gray-700 font-semibold">P1</div>
+            <div id="p1Count" class="text-2xl font-bold mt-2">...</div>
+        </div>
+
+        <div class="canva-card text-center">
+            <div class="text-gray-700 font-semibold">P2</div>
+            <div id="p2Count" class="text-2xl font-bold mt-2">...</div>
+        </div>
+
+        <div class="canva-card text-center">
+            <div class="text-gray-700 font-semibold">Cash</div>
+            <div id="cashCount" class="text-2xl font-bold mt-2">...</div>
+        </div>
+
+        <div class="canva-card text-center">
+            <div class="text-gray-700 font-semibold">Repair</div>
+            <div id="repairCount" class="text-2xl font-bold mt-2">...</div>
+        </div>
+
+        <div class="canva-card text-center">
+            <div class="text-gray-700 font-semibold">Petty</div>
+            <div id="pettyCount" class="text-2xl font-bold mt-2">...</div>
+        </div>
+
+        <div class="canva-card text-center">
+            <div class="text-gray-700 font-semibold">HO</div>
+            <div id="hoCount" class="text-2xl font-bold mt-2">...</div>
+        </div>
+    </div>
+
+    <!-- WEEKLY CHART -->
+    <div class="canva-card w-[95%] mx-auto mb-6">
+        <h2 class="text-xl font-semibold mb-3">📊 Jobsheet Weekly Count</h2>
+        <canvas id="weeklyChart" height="120"></canvas>
+    </div>
+
+    <!-- P3 PARTS GRAPH -->
+    <div class="canva-card w-[95%] mx-auto mb-6">
+        <h2 class="text-xl font-semibold mb-3">🔧 P3 Parts Usage (Top 10)</h2>
+        <canvas id="p3Chart" height="120"></canvas>
+    </div>
+
+    <!-- RAW DATA -->
+    <div class="canva-card w-[95%] mx-auto mb-20">
+        <h2 class="text-xl font-semibold mb-3">📄 Raw Data</h2>
+        <table class="w-full text-sm border-collapse">
+            <thead id="tableHead" class="bg-gray-100"></thead>
             <tbody id="tableBody"></tbody>
         </table>
-    </section>
+    </div>
 
     <script src="script.js"></script>
 </body>
 </html>
+
