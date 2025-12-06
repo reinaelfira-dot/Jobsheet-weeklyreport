@@ -1,56 +1,241 @@
+/* GLOBAL SETTINGS */
 body {
-    margin: 0;
-    padding: 0;
-    background: #f5f5f5;
-    font-family: Arial, sans-serif;
+    font-family: "Inter", sans-serif;
 }
 
-.header {
-    background: #a60000;
-    color: white;
+/* WRAPPER – Semua konten diberi margin kiri kanan */
+.wrapper {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* CARD UTAMA / CANVA CARD */
+.canva-card {
+    background: #ffffff;
+    border-radius: 20px;
     padding: 25px;
-    text-align: center;
-    font-size: 1.2rem;
+    margin-bottom: 20px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    position: relative;
 }
 
-.cards {
+/* TITLE DI DALAM CARD */
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    padding: 20px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.card {
-    background: white;
-    padding: 18px;
-    margin: 10px;
-    border-radius: 8px;
-    min-width: 150px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    font-size: 1.1rem;
+/* BADGE "Units" */
+.unit-badge {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    background: #A60000;
+    color: white;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
 }
 
-.panel {
-    background: white;
-    margin: 20px;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+
+/* SCROLLABLE CARD CONTENT */
+.scroll-card {
+    max-height: 350px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.scroll-body {
+    overflow-y: auto;
     margin-top: 15px;
+    padding-right: 5px;
+    height: 290px;
 }
 
-th, td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    font-size: 0.85rem;
+/* SCROLLBAR CUSTOM */
+.scroll-body::-webkit-scrollbar {
+    width: 6px;
 }
 
-th {
-    background: #eee;
+.scroll-body::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 100px;
 }
+
+.scroll-body::-webkit-scrollbar-thumb {
+    background: #A60000;
+    border-radius: 100px;
+}
+
+/* ITEM LIST DALAM CARD */
+.list-item {
+    background: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.list-item:hover {
+    background: #ffe5e5;
+    transform: translateX(4px);
+}
+
+/* Bubble merah angka */
+.item-badge {
+    background: #A60000;
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 700;
+    min-width: 45px;
+    text-align: center;
+}
+
+
+
+/* BUTTONS */
+.canva-btn-primary {
+    background: #A60000;
+    color: white;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: 12px;
+    transition: 0.2s;
+}
+
+.canva-btn-primary:hover {
+    background: #8A0000;
+    transform: translateY(-1px);
+}
+
+.canva-btn-outline {
+    border: 2px solid #A60000;
+    padding: 12px 24px;
+    color: #A60000;
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: 12px;
+    transition: 0.2s;
+}
+
+.canva-btn-outline:hover {
+    background: #ffe5e5;
+}
+
+
+
+/* INPUT CANVA (DROPDOWN/DATE INPUT) */
+.canva-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e5e5;
+    border-radius: 12px;
+    background: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.canva-input:hover {
+    border-color: #A60000;
+}
+
+.canva-input:focus {
+    outline: none;
+    border-color: #A60000;
+    box-shadow: 0px 0px 4px rgba(166,0,0,0.4);
+}
+
+/* LABEL CANVA */
+.canva-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+
+/* SUMMARY CARD (Jobsheet Overview) */
+.summary-card {
+    padding: 25px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #ff4d4d, #A60000);
+    color: white;
+    text-align: center;
+    box-shadow: 0px 6px 14px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(0,0,0,0.25);
+}
+
+.summary-title {
+    font-weight: 700;
+    font-size: 17px;
+}
+
+.summary-value {
+    font-size: 45px;
+    font-weight: 900;
+    margin: 8px 0;
+}
+
+.summary-sub {
+    font-size: 13px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+
+
+/* LOADING SPINNER – Canva Style */
+.spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid #e6e6e6;
+    border-top-color: #A60000;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+/* CHART CARD */
+.chart-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 30px;
+}
+
+.chart-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+
