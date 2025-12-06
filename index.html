@@ -192,6 +192,23 @@
     </div>
 
 </div>
+<!-- CHART CONTAINER -->
+<div class="canva-card mt-4">
+    <div class="card-title">📊 Status Unit Distribution</div>
+
+    <div class="mb-3">
+        <select id="chartSelector" class="form-select">
+            <option value="status">Status Unit</option>
+            <option value="customer">Customer</option>
+            <option value="location">Location</option>
+            <option value="vehicle">Vehicle Type</option>
+            <option value="year">Year</option>
+        </select>
+    </div>
+
+    <canvas id="assetChart" height="120"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="script.js"></script>
 </body>
