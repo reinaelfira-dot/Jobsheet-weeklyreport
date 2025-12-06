@@ -15,19 +15,27 @@ function showLoading(target) {
 
 /* FORMATTER */
 function formatNumber(num) {
-    return num.toLocaleString("id-ID");
+    if (!num) return 0;
+    return Number(num).toLocaleString("id-ID");
 }
 
 /* TODAY DATE LABEL */
 function nowLabel() {
     const now = new Date();
-    return now.toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    return now.toLocaleString("id-ID", { 
+        day: "2-digit", 
+        month: "short", 
+        year: "numeric", 
+        hour: "2-digit", 
+        minute: "2-digit" 
+    });
 }
 
 /* -----------------------------------------------------------
       LOAD DATA FROM GOOGLE SHEETS
 ------------------------------------------------------------*/
 async function loadData() {
+
     showLoading("statusUnitBody");
     showLoading("customerBody");
     showLoading("locationBody");
@@ -40,18 +48,35 @@ async function loadData() {
     showLoading("jobsheetCategoryChartBody");
 
     try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
 
-        assetData = data.assets || [];
-        jobsheetData = data.jobsheet || [];
-        p2Data = data.p2 || [];
-        p3Data = data.p3 || [];
+        console.log("Fetching Google Sheets...");
+
+        const assetRes = await fetch(API_URL + "?action=asset");
+        const jobsheetRes = await fetch(API_URL + "?action=jobsheet");
+        const p2Res = await fetch(API_URL + "?action=p2");
+        const p3Res = await fetch(API_URL + "?action=p3");
+
+        const assetJson = await assetRes.json();
+        const jobsheetJson = await jobsheetRes.json();
+        const p2Json = await p2Res.json();
+        const p3Json = await p3Res.json();
+
+        assetData = assetJson.data || [];
+        jobsheetData = jobsheetJson.data || [];
+        p2Data = p2Json.data || [];
+        p3Data = p3Json.data || [];
+
+        console.log("ASSET:", assetData.length);
+        console.log("JOBSHEET:", jobsheetData.length);
+        console.log("P2:", p2Data.length);
+        console.log("P3:", p3Data.length);
 
         document.getElementById("lastUpdate").innerHTML = nowLabel();
 
         renderAssetOverview();
         renderJobsheetOverview();
+        renderJobsheetSiteChart();
+        renderAssetChart("status");
 
     } catch (err) {
         console.error("Error loading data:", err);
@@ -59,7 +84,6 @@ async function loadData() {
 }
 
 document.addEventListener("DOMContentLoaded", loadData);
-
 
 /* -----------------------------------------------------------
       ASSET OVERVIEW – LIST CARDS (CANVA STYLE)
@@ -72,7 +96,6 @@ function buildListCard(target, title, icon, items, valueKey) {
     <div class="canva-card scroll-card">
         <div class="card-title">${icon} ${title}</div>
         <div class="unit-badge">${formatNumber(total)} Units</div>
-
         <div class="scroll-body">
     `;
 
@@ -81,20 +104,16 @@ function buildListCard(target, title, icon, items, valueKey) {
         <div class="list-item">
             <span>${row.name}</span>
             <span class="item-badge">${formatNumber(row[valueKey])}</span>
-        </div>
-        `;
+        </div>`;
     });
 
-    html += `
-        </div>
-    </div>
-    `;
+    html += `</div></div>`;
 
     document.getElementById(target).innerHTML = html;
 }
 
 function renderAssetOverview() {
-    // Grouping helper
+
     function groupBy(data, key) {
         const result = {};
         data.forEach(row => {
@@ -111,8 +130,6 @@ function renderAssetOverview() {
     buildListCard("yearBody", "Year", "📅", groupBy(assetData, "Year"), "count");
     buildListCard("vehicleTypeBody", "Vehicle Type", "🚙", groupBy(assetData, "VehicleType"), "count");
 }
-
-
 
 /* -----------------------------------------------------------
       JOBSHEET OVERVIEW (SUMMARY CARDS)
@@ -132,7 +149,6 @@ function renderJobsheetOverview() {
                 <div class="summary-card" onclick="openDetail('P1')">
                     <div class="summary-title">P1 PRIORITY</div>
                     <div class="summary-value">${formatNumber(p1.length)}</div>
-                    <div class="summary-sub">High Priority - Click for details</div>
                 </div>
             </div>
 
@@ -140,7 +156,6 @@ function renderJobsheetOverview() {
                 <div class="summary-card" onclick="openDetail('P2')">
                     <div class="summary-title">P2 PRIORITY</div>
                     <div class="summary-value">${formatNumber(p2.length)}</div>
-                    <div class="summary-sub">Medium Priority - Click for details</div>
                 </div>
             </div>
 
@@ -148,7 +163,6 @@ function renderJobsheetOverview() {
                 <div class="summary-card" onclick="openDetail('Cash')">
                     <div class="summary-title">CASH ON SITE</div>
                     <div class="summary-value">${formatNumber(cash.length)}</div>
-                    <div class="summary-sub">On-site payment jobs</div>
                 </div>
             </div>
 
@@ -156,9 +170,9 @@ function renderJobsheetOverview() {
                 <div class="summary-card" onclick="openDetail('Repair')">
                     <div class="summary-title">REPAIR</div>
                     <div class="summary-value">${formatNumber(repair.length)}</div>
-                    <div class="summary-sub">Total Repairs</div>
                 </div>
             </div>
+
         </div>
 
         <div class="mt-4">
@@ -169,8 +183,6 @@ function renderJobsheetOverview() {
         </div>
     `;
 }
-
-
 
 /* -----------------------------------------------------------
       JOBSHEET CHART (BAR DISTRIBUTION BY SITE)
@@ -187,19 +199,15 @@ function renderJobsheetSiteChart() {
     let html = "";
 
     Object.entries(group).forEach(([site, count]) => {
-        const percent = ((count / jobsheetData.length) * 100).toFixed(1);
-
         html += `
         <div class="list-item">
             <span>${site}</span>
             <span class="item-badge">${formatNumber(count)}</span>
-        </div>
-        `;
+        </div>`;
     });
 
     document.getElementById("jobsheetSiteChartBody").innerHTML = html;
 }
-
 
 /* -----------------------------------------------------------
       OPEN DETAIL POPUP
@@ -207,13 +215,13 @@ function renderJobsheetSiteChart() {
 function openDetail(type) {
     alert("Detail for: " + type);
 }
+
 /* -----------------------------------------------------------
-     CHART ENGINE – CANVA STYLE
+     CANVA STYLE CHART ENGINE
 ------------------------------------------------------------*/
 
 let assetChart = null;
 
-// Helper: Grouping
 function groupByCount(data, key) {
     const obj = {};
     data.forEach(row => {
@@ -224,7 +232,6 @@ function groupByCount(data, key) {
     return Object.entries(obj).map(([k, v]) => ({ name: k, value: v }));
 }
 
-// Build chart
 function renderAssetChart(type = "status") {
     let grouped = [];
 
@@ -234,16 +241,14 @@ function renderAssetChart(type = "status") {
     if (type === "vehicle") grouped = groupByCount(assetData, "VehicleType");
     if (type === "year") grouped = groupByCount(assetData, "Year");
 
-    grouped.sort((a,b)=>b.value - a.value); // sort descending
+    grouped.sort((a,b) => b.value - a.value);
 
     const labels = grouped.map(x => x.name);
     const values = grouped.map(x => x.value);
     const total = values.reduce((a,b)=>a+b,0);
-    const percentages = values.map(v => ((v/total)*100).toFixed(1));
 
     const ctx = document.getElementById("assetChart").getContext("2d");
 
-    // Destroy existing chart
     if (assetChart !== null) assetChart.destroy();
 
     assetChart = new Chart(ctx, {
@@ -254,7 +259,6 @@ function renderAssetChart(type = "status") {
                 label: "Count",
                 data: values,
                 backgroundColor: function(context) {
-                    const idx = context.dataIndex;
                     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
                     gradient.addColorStop(0, "#E23939");
                     gradient.addColorStop(1, "#A60000");
@@ -266,52 +270,23 @@ function renderAssetChart(type = "status") {
         },
         options: {
             responsive: true,
-            animation: {
-                duration: 1200,
-                easing: "easeOutQuart"
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: "#333",
-                        callback: function(value) {
-                            return value.toLocaleString("id-ID");
-                        }
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: "#333",
-                        maxRotation: 50,
-                        minRotation: 0
-                    }
-                }
-            },
-
+            animation: { duration: 1200 },
             plugins: {
                 legend: { display: false },
-
                 tooltip: {
                     callbacks: {
-                        label: function(ctx) {
+                        label: (ctx) => {
                             const value = ctx.raw;
-                            const pct = ((value / total) * 100).toFixed(1);
-                            return `${value.toLocaleString("id-ID")} units (${pct}%)`;
+                            const pct = ((value/total)*100).toFixed(1);
+                            return `${value} units (${pct}%)`;
                         }
                     }
-                },
-
-                datalabels: {
-                    anchor: 'end',
-                    align: 'end'
                 }
             }
         }
     });
 }
 
-/* Dropdown listener */
 document.addEventListener("DOMContentLoaded", () => {
     const sel = document.getElementById("chartSelector");
 
