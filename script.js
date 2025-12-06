@@ -5,294 +5,150 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn4
 
 let assetData = [];
 let jobsheetData = [];
-let p2Data = [];
-let p3Data = [];
 
-/* SPINNER */
-function showLoading(target) {
-    document.getElementById(target).innerHTML = `<div class="spinner"></div>`;
-}
-
-/* FORMATTER */
+/* Format number */
 function formatNumber(num) {
-    if (!num) return 0;
-    return Number(num).toLocaleString("id-ID");
+    return Number(num || 0).toLocaleString("id-ID");
 }
 
-/* TODAY DATE LABEL */
+/* Timestamp */
 function nowLabel() {
     const now = new Date();
-    return now.toLocaleString("id-ID", { 
-        day: "2-digit", 
-        month: "short", 
-        year: "numeric", 
-        hour: "2-digit", 
-        minute: "2-digit" 
-    });
+    return now.toLocaleString("id-ID");
 }
 
 /* -----------------------------------------------------------
-      LOAD DATA FROM GOOGLE SHEETS
+      LOAD DATA
 ------------------------------------------------------------*/
 async function loadData() {
-
-    showLoading("statusUnitBody");
-    showLoading("customerBody");
-    showLoading("locationBody");
-    showLoading("vehicleTypeBody");
-    showLoading("yearBody");
-
-    showLoading("jobsheetSummary");
-    showLoading("jobsheetChart");
-    showLoading("jobsheetSiteChartBody");
-    showLoading("jobsheetCategoryChartBody");
-
     try {
+        // LOAD ASSET
+        const a = await fetch(API_URL + "?action=asset");
+        const A = await a.json();
+        assetData = A.data || [];
 
-        console.log("Fetching Google Sheets...");
+        // LOAD JOBSHEET
+        const j = await fetch(API_URL + "?action=jobsheet");
+        const J = await j.json();
+        jobsheetData = J.data || [];
 
-        const assetRes = await fetch(API_URL + "?action=asset");
-        const jobsheetRes = await fetch(API_URL + "?action=jobsheet");
-        const p2Res = await fetch(API_URL + "?action=p2");
-        const p3Res = await fetch(API_URL + "?action=p3");
+        document.getElementById("lastAssetUpdate").innerText = nowLabel();
 
-        const assetJson = await assetRes.json();
-        const jobsheetJson = await jobsheetRes.json();
-        const p2Json = await p2Res.json();
-        const p3Json = await p3Res.json();
-
-        assetData = assetJson.data || [];
-        jobsheetData = jobsheetJson.data || [];
-        p2Data = p2Json.data || [];
-        p3Data = p3Json.data || [];
-
-        console.log("ASSET:", assetData.length);
-        console.log("JOBSHEET:", jobsheetData.length);
-        console.log("P2:", p2Data.length);
-        console.log("P3:", p3Data.length);
-
-        document.getElementById("lastUpdate").innerHTML = nowLabel();
-
-        renderAssetOverview();
-        renderJobsheetOverview();
-        renderJobsheetSiteChart();
+        renderAssetCards();
+        renderJobsheetSummary();
         renderAssetChart("status");
 
     } catch (err) {
-        console.error("Error loading data:", err);
+        console.error(err);
     }
 }
 
 document.addEventListener("DOMContentLoaded", loadData);
 
 /* -----------------------------------------------------------
-      ASSET OVERVIEW – LIST CARDS (CANVA STYLE)
+   ASSET OVERVIEW LIST BUILDER
 ------------------------------------------------------------*/
+function groupAndRender(listId, totalId, key) {
+    const map = {};
 
-function buildListCard(target, title, icon, items, valueKey) {
-    let total = items.reduce((sum, x) => sum + Number(x[valueKey] || 0), 0);
-
-    let html = `
-    <div class="canva-card scroll-card">
-        <div class="card-title">${icon} ${title}</div>
-        <div class="unit-badge">${formatNumber(total)} Units</div>
-        <div class="scroll-body">
-    `;
-
-    items.forEach(row => {
-        html += `
-        <div class="list-item">
-            <span>${row.name}</span>
-            <span class="item-badge">${formatNumber(row[valueKey])}</span>
-        </div>`;
+    assetData.forEach(row => {
+        const val = row[key] || "Unknown";
+        map[val] = (map[val] || 0) + 1;
     });
 
-    html += `</div></div>`;
+    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
 
-    document.getElementById(target).innerHTML = html;
-}
-
-function renderAssetOverview() {
-
-    function groupBy(data, key) {
-        const result = {};
-        data.forEach(row => {
-            const val = row[key] || "Unknown";
-            if (!result[val]) result[val] = 0;
-            result[val]++;
-        });
-        return Object.entries(result).map(([k, v]) => ({ name: k, count: v }));
-    }
-
-    buildListCard("statusUnitBody", "Status Unit", "📊", groupBy(assetData, "Status"), "count");
-    buildListCard("customerBody", "Customer", "👥", groupBy(assetData, "Customer"), "count");
-    buildListCard("locationBody", "Location", "📍", groupBy(assetData, "Location"), "count");
-    buildListCard("yearBody", "Year", "📅", groupBy(assetData, "Year"), "count");
-    buildListCard("vehicleTypeBody", "Vehicle Type", "🚙", groupBy(assetData, "VehicleType"), "count");
-}
-
-/* -----------------------------------------------------------
-      JOBSHEET OVERVIEW (SUMMARY CARDS)
-------------------------------------------------------------*/
-function renderJobsheetOverview() {
-    const p1 = jobsheetData.filter(x => x.Priority === "P1");
-    const p2 = jobsheetData.filter(x => x.Priority === "P2");
-    const cash = jobsheetData.filter(x => x.Priority === "Cash");
-    const repair = jobsheetData.filter(x => x.Priority === "Repair");
-
-    const totalCost = jobsheetData.reduce((sum, x) => sum + Number(x.Cost || 0), 0);
-
-    document.getElementById("jobsheetSummary").innerHTML = `
-        <div class="row g-3">
-
-            <div class="col-md-3">
-                <div class="summary-card" onclick="openDetail('P1')">
-                    <div class="summary-title">P1 PRIORITY</div>
-                    <div class="summary-value">${formatNumber(p1.length)}</div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="summary-card" onclick="openDetail('P2')">
-                    <div class="summary-title">P2 PRIORITY</div>
-                    <div class="summary-value">${formatNumber(p2.length)}</div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="summary-card" onclick="openDetail('Cash')">
-                    <div class="summary-title">CASH ON SITE</div>
-                    <div class="summary-value">${formatNumber(cash.length)}</div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="summary-card" onclick="openDetail('Repair')">
-                    <div class="summary-title">REPAIR</div>
-                    <div class="summary-value">${formatNumber(repair.length)}</div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="mt-4">
-            <h4>💰 Total Cost Estimation</h4>
-            <h2 style="color:#A60000; font-weight:900;">
-                Rp ${formatNumber(totalCost)}
-            </h2>
-        </div>
-    `;
-}
-
-/* -----------------------------------------------------------
-      JOBSHEET CHART (BAR DISTRIBUTION BY SITE)
-------------------------------------------------------------*/
-function renderJobsheetSiteChart() {
-    const group = {};
-
-    jobsheetData.forEach(row => {
-        const site = row.Site || "Unknown";
-        if (!group[site]) group[site] = 0;
-        group[site]++;
-    });
+    document.getElementById(totalId).innerText = formatNumber(assetData.length) + " Units";
 
     let html = "";
-
-    Object.entries(group).forEach(([site, count]) => {
+    sorted.forEach(([name, count]) => {
         html += `
-        <div class="list-item">
-            <span>${site}</span>
-            <span class="item-badge">${formatNumber(count)}</span>
-        </div>`;
+            <div class="list-item">
+                <span>${name}</span>
+                <span class="item-badge">${formatNumber(count)}</span>
+            </div>`;
     });
 
-    document.getElementById("jobsheetSiteChartBody").innerHTML = html;
+    document.getElementById(listId).innerHTML = html;
+}
+
+function renderAssetCards() {
+    groupAndRender("statusUnitList", "statusUnitTotal", "Status");
+    groupAndRender("customerList", "customerTotal", "Customer");
+    groupAndRender("locationList", "locationTotal", "Location");
+    groupAndRender("yearList", "yearTotal", "Year");
+    groupAndRender("vehicleList", "vehicleTotal", "VehicleType");
 }
 
 /* -----------------------------------------------------------
-      OPEN DETAIL POPUP
+      JOBSHEET SUMMARY
 ------------------------------------------------------------*/
-function openDetail(type) {
-    alert("Detail for: " + type);
+function renderJobsheetSummary() {
+    const p1 = jobsheetData.filter(x => x["Category (P1,P2,P3/Ready Stock)"]?.includes("P1"));
+    const p2 = jobsheetData.filter(x => x["Category (P1,P2,P3/Ready Stock)"]?.includes("P2"));
+    const cash = jobsheetData.filter(x => x["Memo"]?.toLowerCase().includes("cash"));
+    const repair = jobsheetData.filter(x => x["VCR"]?.toLowerCase().includes("repair"));
+
+    const totalCost = jobsheetData.reduce((sum, x) => {
+        return sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0);
+    }, 0);
+
+    document.getElementById("p1CountJS").innerText = p1.length;
+    document.getElementById("p2CountJS").innerText = p2.length;
+    document.getElementById("cashCountJS").innerText = cash.length;
+    document.getElementById("repairCountJS").innerText = repair.length;
+
+    document.getElementById("totalCostJS").innerText = "Rp " + formatNumber(totalCost);
 }
 
 /* -----------------------------------------------------------
-     CANVA STYLE CHART ENGINE
+      CHART SECTION
 ------------------------------------------------------------*/
-
 let assetChart = null;
 
-function groupByCount(data, key) {
-    const obj = {};
-    data.forEach(row => {
-        const v = row[key] || "Unknown";
-        if (!obj[v]) obj[v] = 0;
-        obj[v]++;
+function renderAssetChart(type) {
+    let groupKey = "";
+    if (type === "status") groupKey = "Status";
+    if (type === "customer") groupKey = "Customer";
+    if (type === "location") groupKey = "Location";
+    if (type === "vehicle") groupKey = "VehicleType";
+    if (type === "year") groupKey = "Year";
+
+    const map = {};
+    assetData.forEach(row => {
+        const val = row[groupKey] || "Unknown";
+        map[val] = (map[val] || 0) + 1;
     });
-    return Object.entries(obj).map(([k, v]) => ({ name: k, value: v }));
-}
 
-function renderAssetChart(type = "status") {
-    let grouped = [];
-
-    if (type === "status") grouped = groupByCount(assetData, "Status");
-    if (type === "customer") grouped = groupByCount(assetData, "Customer");
-    if (type === "location") grouped = groupByCount(assetData, "Location");
-    if (type === "vehicle") grouped = groupByCount(assetData, "VehicleType");
-    if (type === "year") grouped = groupByCount(assetData, "Year");
-
-    grouped.sort((a,b) => b.value - a.value);
-
-    const labels = grouped.map(x => x.name);
-    const values = grouped.map(x => x.value);
-    const total = values.reduce((a,b)=>a+b,0);
+    const labels = Object.keys(map);
+    const values = Object.values(map);
 
     const ctx = document.getElementById("assetChart").getContext("2d");
 
-    if (assetChart !== null) assetChart.destroy();
+    if (assetChart) assetChart.destroy();
 
     assetChart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: labels,
+            labels,
             datasets: [{
-                label: "Count",
+                label: "Units",
                 data: values,
-                backgroundColor: function(context) {
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                    gradient.addColorStop(0, "#E23939");
-                    gradient.addColorStop(1, "#A60000");
-                    return gradient;
-                },
-                borderRadius: 10,
-                barThickness: 30
+                backgroundColor: "#A60000",
+                borderRadius: 8
             }]
         },
         options: {
             responsive: true,
-            animation: { duration: 1200 },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const value = ctx.raw;
-                            const pct = ((value/total)*100).toFixed(1);
-                            return `${value} units (${pct}%)`;
-                        }
-                    }
-                }
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true },
+                x: { ticks: { maxRotation: 50 } }
             }
         }
     });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const sel = document.getElementById("chartSelector");
-
-    if (sel) {
-        sel.addEventListener("change", function () {
-            renderAssetChart(this.value);
-        });
-    }
+document.getElementById("chartSelector").addEventListener("change", e => {
+    renderAssetChart(e.target.value);
 });
