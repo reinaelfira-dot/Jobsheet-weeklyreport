@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PT Transkon Jaya – Fleet & Jobsheet Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header class="header">
+        <h1>PT Transkon Jaya – Fleet Management Dashboard</h1>
+        <p>Real-Time Asset & Jobsheet Monitoring System</p>
+    </header>
+
+    <section class="cards">
+        <div class="card" id="p1Count">P1: ...</div>
+        <div class="card" id="p2Count">P2: ...</div>
+        <div class="card" id="cashCount">Cash: ...</div>
+        <div class="card" id="repairCount">Repair: ...</div>
+        <div class="card" id="pettyCount">Petty: ...</div>
+        <div class="card" id="hoCount">Dana HO: ...</div>
+        <div class="card" id="totalCost">Total Cost: ...</div>
+    </section>
+
+    <section class="panel">
+        <h2>Jobsheet Weekly Count</h2>
+        <canvas id="weeklyChart"></canvas>
+    </section>
+
+    <section class="panel">
+        <h2>P3 Parts Usage (Top 10)</h2>
+        <canvas id="p3Chart"></canvas>
+    </section>
+
+    <section class="panel">
+        <h2>Raw Data</h2>
+        <table id="rawTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
