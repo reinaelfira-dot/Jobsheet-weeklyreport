@@ -207,3 +207,117 @@ function renderJobsheetSiteChart() {
 function openDetail(type) {
     alert("Detail for: " + type);
 }
+/* -----------------------------------------------------------
+     CHART ENGINE – CANVA STYLE
+------------------------------------------------------------*/
+
+let assetChart = null;
+
+// Helper: Grouping
+function groupByCount(data, key) {
+    const obj = {};
+    data.forEach(row => {
+        const v = row[key] || "Unknown";
+        if (!obj[v]) obj[v] = 0;
+        obj[v]++;
+    });
+    return Object.entries(obj).map(([k, v]) => ({ name: k, value: v }));
+}
+
+// Build chart
+function renderAssetChart(type = "status") {
+    let grouped = [];
+
+    if (type === "status") grouped = groupByCount(assetData, "Status");
+    if (type === "customer") grouped = groupByCount(assetData, "Customer");
+    if (type === "location") grouped = groupByCount(assetData, "Location");
+    if (type === "vehicle") grouped = groupByCount(assetData, "VehicleType");
+    if (type === "year") grouped = groupByCount(assetData, "Year");
+
+    grouped.sort((a,b)=>b.value - a.value); // sort descending
+
+    const labels = grouped.map(x => x.name);
+    const values = grouped.map(x => x.value);
+    const total = values.reduce((a,b)=>a+b,0);
+    const percentages = values.map(v => ((v/total)*100).toFixed(1));
+
+    const ctx = document.getElementById("assetChart").getContext("2d");
+
+    // Destroy existing chart
+    if (assetChart !== null) assetChart.destroy();
+
+    assetChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Count",
+                data: values,
+                backgroundColor: function(context) {
+                    const idx = context.dataIndex;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, "#E23939");
+                    gradient.addColorStop(1, "#A60000");
+                    return gradient;
+                },
+                borderRadius: 10,
+                barThickness: 30
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1200,
+                easing: "easeOutQuart"
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: "#333",
+                        callback: function(value) {
+                            return value.toLocaleString("id-ID");
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: "#333",
+                        maxRotation: 50,
+                        minRotation: 0
+                    }
+                }
+            },
+
+            plugins: {
+                legend: { display: false },
+
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const value = ctx.raw;
+                            const pct = ((value / total) * 100).toFixed(1);
+                            return `${value.toLocaleString("id-ID")} units (${pct}%)`;
+                        }
+                    }
+                },
+
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end'
+                }
+            }
+        }
+    });
+}
+
+/* Dropdown listener */
+document.addEventListener("DOMContentLoaded", () => {
+    const sel = document.getElementById("chartSelector");
+
+    if (sel) {
+        sel.addEventListener("change", function () {
+            renderAssetChart(this.value);
+        });
+    }
+});
