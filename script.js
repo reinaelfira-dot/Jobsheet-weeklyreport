@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------
-      GLOBAL SETTINGS
+      API URL
 ------------------------------------------------------------*/
 const API_URL =
   "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec";
@@ -19,30 +19,33 @@ function nowLabel() {
 }
 
 /* -----------------------------------------------------------
-      LOAD ALL DATA
+      LOAD DATA (ASSET + JOBSHEET)
 ------------------------------------------------------------*/
 async function loadData() {
   try {
+    console.log("Loading data...");
+
     // LOAD ASSET
-    const a = await fetch(API_URL + "?action=asset");
-    const A = await a.json();
-    assetData = A.data || [];
+    const assetReq = await fetch(API_URL + "?action=asset");
+    const assetJson = await assetReq.json();
+    assetData = assetJson.data || [];
 
     // LOAD JOBSHEET
-    const j = await fetch(API_URL + "?action=jobsheet");
-    const J = await j.json();
-    jobsheetData = J.data || [];
+    const jsReq = await fetch(API_URL + "?action=jobsheet");
+    const jsJson = await jsReq.json();
+    jobsheetData = jsJson.data || [];
 
-    // TIMESTAMP UPDATE
+    console.log("Asset Loaded:", assetData.length);
+    console.log("Jobsheet Loaded:", jobsheetData.length);
+
     document.getElementById("lastAssetUpdate").innerText = nowLabel();
 
-    // RENDER UI
     renderAssetCards();
     renderJobsheetSummary();
     renderAssetChart("status");
 
   } catch (err) {
-    console.error("Load error:", err);
+    console.error("LOAD ERROR:", err);
   }
 }
 
@@ -88,18 +91,14 @@ function renderAssetCards() {
       JOBSHEET SUMMARY RENDER
 ------------------------------------------------------------*/
 function renderJobsheetSummary() {
-  const p1 = jobsheetData.filter((x) =>
-    x["Category (P1,P2,P3/Ready Stock)"]?.includes("P1")
-  );
-  const p2 = jobsheetData.filter((x) =>
-    x["Category (P1,P2,P3/Ready Stock)"]?.includes("P2")
-  );
-  const cash = jobsheetData.filter((x) =>
-    x["Memo"]?.toLowerCase().includes("cash")
-  );
-  const repair = jobsheetData.filter((x) =>
-    x["VCR"]?.toLowerCase().includes("repair")
-  );
+  function countContains(col, str) {
+    return jobsheetData.filter((x) => x[col]?.toLowerCase().includes(str)).length;
+  }
+
+  const p1 = countContains("Category (P1,P2,P3/Ready Stock)", "p1");
+  const p2 = countContains("Category (P1,P2,P3/Ready Stock)", "p2");
+  const cash = countContains("Memo", "cash");
+  const repair = countContains("VCR", "repair");
 
   const totalCost = jobsheetData.reduce((sum, x) => {
     return (
@@ -110,39 +109,37 @@ function renderJobsheetSummary() {
     );
   }, 0);
 
-  document.getElementById("p1CountJS").innerText = p1.length;
-  document.getElementById("p2CountJS").innerText = p2.length;
-  document.getElementById("cashCountJS").innerText = cash.length;
-  document.getElementById("repairCountJS").innerText = repair.length;
-
-  document.getElementById("totalCostJS").innerText =
-    "Rp " + formatNumber(totalCost);
+  document.getElementById("p1CountJS").innerText = p1;
+  document.getElementById("p2CountJS").innerText = p2;
+  document.getElementById("cashCountJS").innerText = cash;
+  document.getElementById("repairCountJS").innerText = repair;
+  document.getElementById("totalCostJS").innerText = "Rp " + formatNumber(totalCost);
 }
 
 /* -----------------------------------------------------------
-      CHART (CANVA STYLE)
+      CANVA-STYLE BAR CHART
 ------------------------------------------------------------*/
-let assetChart = null;
+let assetChart;
 
 function renderAssetChart(type) {
-  let key = "";
-  if (type === "status") key = "Status";
-  if (type === "customer") key = "Customer";
-  if (type === "location") key = "Location";
-  if (type === "vehicle") key = "VehicleType";
-  if (type === "year") key = "Year";
+  const key = {
+    status: "Status",
+    customer: "Customer",
+    location: "Location",
+    vehicle: "VehicleType",
+    year: "Year"
+  }[type];
 
   const map = {};
   assetData.forEach((r) => {
-    const val = r[key] || "Unknown";
-    map[val] = (map[val] || 0) + 1;
+    const v = r[key] || "Unknown";
+    map[v] = (map[v] || 0) + 1;
   });
 
   const labels = Object.keys(map);
   const values = Object.values(map);
 
   const ctx = document.getElementById("assetChart").getContext("2d");
-
   if (assetChart) assetChart.destroy();
 
   assetChart = new Chart(ctx, {
@@ -154,7 +151,7 @@ function renderAssetChart(type) {
           label: "Units",
           data: values,
           backgroundColor: "#A60000",
-          borderRadius: 9,
+          borderRadius: 10,
         },
       ],
     },
@@ -168,8 +165,6 @@ function renderAssetChart(type) {
   });
 }
 
-document
-  .getElementById("chartSelector")
-  .addEventListener("change", (e) => {
-    renderAssetChart(e.target.value);
-  });
+document.getElementById("chartSelector").addEventListener("change", (e) => {
+  renderAssetChart(e.target.value);
+});
