@@ -1,144 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT Transkon Jaya – Fleet Management Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PT Transkon Jaya – Fleet Management Dashboard</title>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Font - Canva Style -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Google Font (Inter – Canva uses this style) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body {
-            background: #f8f8f8;
-            font-family: 'Inter', sans-serif;
-        }
+<!-- Custom CSS -->
+<link rel="stylesheet" href="assets.css">
 
-        .canva-card {
-            background: white;
-            border-radius: 18px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            padding: 22px;
-        }
-
-        .section-header {
-            background: #a60000;
-            color: white;
-            border-radius: 18px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        .canva-btn {
-            border-radius: 12px;
-            padding: 10px 18px;
-            font-weight: 600;
-        }
-
-        .btn-apply {
-            background: #a60000;
-            color: white;
-        }
-        .btn-reset {
-            border: 2px solid #a60000;
-            color: #a60000;
-        }
-    </style>
 </head>
 
-<body>
+<body class="bg-[#8A0000] font-inter overflow-x-hidden">
 
-    <!-- HEADER -->
-    <div class="section-header text-center">
-        <h1 class="text-4xl font-bold">PT Transkon Jaya – Fleet Management Dashboard</h1>
-        <p class="opacity-90 mt-2 text-lg">Real-time Asset & Jobsheet Monitoring System</p>
-    </div>
+<!-- HEADER -->
+<section class="w-full bg-[#A60000] text-white py-10 shadow-xl">
+    <h1 class="text-center text-4xl font-extrabold">
+        PT Transkon Jaya – Fleet Management Dashboard
+    </h1>
+    <p class="text-center text-lg mt-2 opacity-90">
+        Real-time Asset & Jobsheet Monitoring System
+    </p>
+</section>
 
-    <!-- ASSET OVERVIEW -->
-    <div class="canva-card w-[95%] mx-auto mb-5">
-        <h2 class="text-xl font-bold flex items-center gap-2">
+<!-- ASSET OVERVIEW SECTION -->
+<div class="wrapper">
+
+    <!-- ASSET OVERVIEW TITLE -->
+    <div class="canva-card">
+        <div class="flex items-center gap-2 text-xl font-bold">
             🚗 ASSET OVERVIEW
-        </h2>
+        </div>
         <p class="text-gray-600">Fleet asset management and distribution statistics</p>
     </div>
 
-    <!-- FILTER CARD -->
-    <div class="canva-card w-[95%] mx-auto mb-6">
-        <h3 class="font-semibold mb-3 text-lg">🔍 Filter Asset Data</h3>
+    <!-- FILTER ASSET CARD -->
+    <div class="canva-card mt-6">
 
-        <label class="block text-sm font-semibold mb-1">HUB LOCATION</label>
-        <select id="hubFilter" class="border rounded-lg p-3 w-full mb-4">
-            <option>All HUBs</option>
-        </select>
+        <h3 class="text-xl font-bold flex items-center gap-2 mb-3">🔍 Filter Asset Data</h3>
 
-        <div class="flex gap-3">
-            <button onclick="applyFilter()" class="canva-btn btn-apply">🔎 Apply Filter</button>
-            <button onclick="resetFilter()" class="canva-btn btn-reset">⭮ Reset</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+                <label class="canva-label">HUB LOCATION</label>
+                <select id="hubFilter" class="canva-input"></select>
+            </div>
+
+            <div>
+                <label class="canva-label">SITE LOCATION</label>
+                <select id="siteFilter" class="canva-input"></select>
+            </div>
+
+        </div>
+
+        <div class="flex gap-3 mt-6">
+            <button id="applyAssetFilter" class="canva-btn-primary">✓ Apply Filter</button>
+            <button id="resetAssetFilter" class="canva-btn-outline">⭮ Reset</button>
+
+            <div class="ml-auto text-sm text-gray-500 flex items-center gap-1">
+                📅 Last Update:
+                <span id="lastAssetUpdate">-</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- STATUS UNIT + CUSTOMER (2 COLUMNS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+
+        <div class="canva-card scroll-card">
+            <div class="card-title">📊 Status Unit</div>
+            <span class="unit-badge" id="statusUnitTotal">0 Units</span>
+            <div id="statusUnitList" class="scroll-body"></div>
+        </div>
+
+        <div class="canva-card scroll-card">
+            <div class="card-title">👥 Customer</div>
+            <span class="unit-badge" id="customerTotal">0 Units</span>
+            <div id="customerList" class="scroll-body"></div>
+        </div>
+
+    </div>
+
+    <!-- LOCATION + YEAR -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+
+        <div class="canva-card scroll-card">
+            <div class="card-title">📍 Location</div>
+            <span class="unit-badge" id="locationTotal">0 Units</span>
+            <div id="locationList" class="scroll-body"></div>
+        </div>
+
+        <div class="canva-card scroll-card">
+            <div class="card-title">📅 Year</div>
+            <span class="unit-badge" id="yearTotal">0 Units</span>
+            <div id="yearList" class="scroll-body"></div>
+        </div>
+
+    </div>
+
+    <!-- VEHICLE TYPE -->
+    <div class="grid grid-cols-1 mt-6">
+        <div class="canva-card scroll-card">
+            <div class="card-title">🚗 Vehicle Type</div>
+            <span class="unit-badge" id="vehicleTotal">0 Units</span>
+            <div id="vehicleList" class="scroll-body"></div>
         </div>
     </div>
 
-    <!-- SUMMARY CARDS -->
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 w-[95%] mx-auto mb-6">
+</div>
 
-        <div class="canva-card text-center">
-            <div class="text-gray-700 font-semibold">P1</div>
-            <div id="p1Count" class="text-2xl font-bold mt-2">...</div>
-        </div>
 
-        <div class="canva-card text-center">
-            <div class="text-gray-700 font-semibold">P2</div>
-            <div id="p2Count" class="text-2xl font-bold mt-2">...</div>
-        </div>
 
-        <div class="canva-card text-center">
-            <div class="text-gray-700 font-semibold">Cash</div>
-            <div id="cashCount" class="text-2xl font-bold mt-2">...</div>
-        </div>
 
-        <div class="canva-card text-center">
-            <div class="text-gray-700 font-semibold">Repair</div>
-            <div id="repairCount" class="text-2xl font-bold mt-2">...</div>
-        </div>
+<!-- JOBSHEET OVERVIEW SECTION -->
+<div class="wrapper mt-10">
 
-        <div class="canva-card text-center">
-            <div class="text-gray-700 font-semibold">Petty</div>
-            <div id="pettyCount" class="text-2xl font-bold mt-2">...</div>
+    <div class="canva-card">
+        <div class="flex items-center gap-2 text-xl font-bold">
+            📑 JOBSHEET OVERVIEW
         </div>
-
-        <div class="canva-card text-center">
-            <div class="text-gray-700 font-semibold">HO</div>
-            <div id="hoCount" class="text-2xl font-bold mt-2">...</div>
-        </div>
+        <p class="text-gray-600">Maintenance and repair job tracking system</p>
     </div>
 
-    <!-- WEEKLY CHART -->
-    <div class="canva-card w-[95%] mx-auto mb-6">
-        <h2 class="text-xl font-semibold mb-3">📊 Jobsheet Weekly Count</h2>
-        <canvas id="weeklyChart" height="120"></canvas>
+    <!-- FILTER JOBSHEET -->
+    <div class="canva-card mt-6">
+        <h3 class="text-xl font-bold">📅 Filter Jobsheet by Received Date</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+                <label class="canva-label">START DATE</label>
+                <input type="date" id="jsStartDate" class="canva-input">
+            </div>
+
+            <div>
+                <label class="canva-label">END DATE</label>
+                <input type="date" id="jsEndDate" class="canva-input">
+            </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+            <button id="applyJSFilter" class="canva-btn-primary">Apply</button>
+            <button id="resetJSFilter" class="canva-btn-outline">Reset</button>
+        </div>
+
     </div>
 
-    <!-- P3 PARTS GRAPH -->
-    <div class="canva-card w-[95%] mx-auto mb-6">
-        <h2 class="text-xl font-semibold mb-3">🔧 P3 Parts Usage (Top 10)</h2>
-        <canvas id="p3Chart" height="120"></canvas>
+    <!-- JOBSHEET SUMMARY -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
+
+        <div class="summary-card" id="p1Card">
+            <div class="summary-title">P1 PRIORITY</div>
+            <div id="p1CountJS" class="summary-value">0</div>
+            <div class="summary-sub">High Priority - Click for details</div>
+        </div>
+
+        <div class="summary-card" id="p2Card">
+            <div class="summary-title">P2 PRIORITY</div>
+            <div id="p2CountJS" class="summary-value">0</div>
+            <div class="summary-sub">Medium Priority - Click for details</div>
+        </div>
+
+        <div class="summary-card" id="cashCard">
+            <div class="summary-title">CASH ON SITE</div>
+            <div id="cashCountJS" class="summary-value">0</div>
+            <div class="summary-sub">On-site Payment - Click for details</div>
+        </div>
+
+        <div class="summary-card" id="repairCard">
+            <div class="summary-title">REPAIR</div>
+            <div id="repairCountJS" class="summary-value">0</div>
+            <div class="summary-sub">Total Repairs - Click for details</div>
+        </div>
+
     </div>
 
-    <!-- RAW DATA -->
-    <div class="canva-card w-[95%] mx-auto mb-20">
-        <h2 class="text-xl font-semibold mb-3">📄 Raw Data</h2>
-        <table class="w-full text-sm border-collapse">
-            <thead id="tableHead" class="bg-gray-100"></thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+    <!-- TOTAL COST -->
+    <div class="canva-card mt-6">
+        <h2 class="text-xl font-bold">💰 Total Cost Estimation</h2>
+        <p id="totalCostJS" class="text-3xl font-extrabold text-[#A60000] mt-2">
+            Rp 0
+        </p>
     </div>
 
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
+
 
