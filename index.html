@@ -198,3 +198,34 @@
 <script src="script.js"></script>
 </body>
 </html>
+
+
+
+<!-- =============================
+     SECTION: ASSET CHARTS
+=============================== -->
+<section class="chart-section">
+    <div class="chart-card">
+        <h2 class="chart-title">
+            <i class="fa-solid fa-chart-column"></i> ASSET CHARTS
+        </h2>
+        <p class="chart-subtitle">Visual analysis of asset distribution</p>
+    </div>
+
+    <div class="chart-card">
+        <label class="chart-label">Select Chart Type</label>
+        <select id="assetChartSelector" class="chart-dropdown">
+            <option value="year">Year</option>
+            <option value="status">Status Unit</option>
+            <option value="customer">Customer</option>
+            <option value="location">Location</option>
+            <option value="vehicle">Vehicle Type</option>
+        </select>
+    </div>
+
+    <div class="chart-card">
+        <h3 id="chartTitle" class="chart-subtitle">Year Distribution</h3>
+        <canvas id="assetChartLarge" height="110"></canvas>
+    </div>
+</section>
+
