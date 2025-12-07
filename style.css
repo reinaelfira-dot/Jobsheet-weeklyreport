@@ -1,43 +1,40 @@
 /* ================================
-   GLOBAL STYLING
+   GLOBAL
 ================================ */
 body {
     font-family: 'Inter', sans-serif;
+    background: #8A0000;
 }
 
-/* Wrapper */
 .wrapper {
-    max-width: 1100px;
+    max-width: 1050px;
     margin: 40px auto;
     padding: 0 15px;
 }
 
-/* Remove list bullets globally */
 ul, li {
     list-style: none !important;
 }
 
 /* ================================
-   Canva Card Style
+   CANVA CARD
 ================================ */
 .canva-card {
     background: #ffffff;
     padding: 22px;
     border-radius: 16px;
     box-shadow: 0 0 0 4px #8b0000;
+    position: relative;
 }
 
 .card-title {
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 /* ================================
-   Filter Fields
+   INPUTS & BUTTONS
 ================================ */
 .canva-input {
     width: 100%;
@@ -45,11 +42,6 @@ ul, li {
     border-radius: 10px;
     border: 2px solid #a60000;
     outline: none;
-    background: white;
-}
-
-.canva-input:focus {
-    border-color: #7a0000;
 }
 
 .canva-label {
@@ -66,11 +58,6 @@ ul, li {
     padding: 12px 22px;
     border-radius: 10px;
     font-weight: 600;
-    transition: 0.2s;
-}
-
-.canva-btn-primary:hover {
-    background: #7a0000;
 }
 
 .canva-btn-outline {
@@ -79,16 +66,10 @@ ul, li {
     border: 2px solid #a60000;
     color: #a60000;
     font-weight: 600;
-    transition: 0.2s;
-}
-
-.canva-btn-outline:hover {
-    background: #a60000;
-    color: white;
 }
 
 /* ================================
-   Scrollable Cards
+   SCROLL LIST CARD
 ================================ */
 .scroll-card {
     position: relative;
@@ -111,7 +92,7 @@ ul, li {
 }
 
 /* ================================
-   List Item
+   LIST ITEM
 ================================ */
 .list-item {
     background: #f7f8fa;
@@ -138,7 +119,7 @@ ul, li {
     font-size: 14px;
 }
 
-/* Top Badge (Total Units) */
+/* Top-right badges */
 .unit-badge {
     position: absolute;
     top: 18px;
@@ -151,7 +132,7 @@ ul, li {
 }
 
 /* ================================
-   Loading Animation
+   LOADING UI
 ================================ */
 .card-loading {
     text-align: center;
@@ -173,7 +154,7 @@ ul, li {
 }
 
 /* ================================
-   Jobsheet Summary Cards
+   JOBSHEET SUMMARY CARDS
 ================================ */
 .summary-card {
     background: white;
@@ -181,6 +162,12 @@ ul, li {
     border-radius: 16px;
     box-shadow: 0 0 0 4px #8b0000;
     text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.summary-card:hover {
+    transform: scale(1.03);
 }
 
 .summary-title {
@@ -198,11 +185,11 @@ ul, li {
 .summary-sub {
     font-size: 12px;
     margin-top: 4px;
-    opacity: 0.7;
+    opacity: 0.75;
 }
 
 /* ================================
-   Connection & Loaded Popups
+   STATUS POPUPS
 ================================ */
 .connection-badge,
 .loaded-badge {
@@ -237,11 +224,10 @@ ul, li {
 
 .loaded-badge .check {
     color: #2ecc71;
-    font-weight: bold;
 }
 
 /* ================================
-   Modal Styling
+   MODAL TK / P1 / P2 / P3 / CASH / REPAIR
 ================================ */
 .modal-overlay {
     position: fixed;
@@ -264,7 +250,7 @@ ul, li {
     width: 520px;
     max-height: 75vh;
     background: white;
-    padding: 20px;
+    padding: 24px;
     border-radius: 14px;
     overflow-y: auto;
     box-shadow: 0 0 0 5px #a60000;
@@ -274,15 +260,8 @@ ul, li {
     display: flex;
     justify-content: space-between;
     font-weight: 700;
-    font-size: 18px;
-    margin-bottom: 14px;
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
+    font-size: 20px;
+    margin-bottom: 16px;
 }
 
 .modal-body {
@@ -293,13 +272,18 @@ ul, li {
 
 .modal-item {
     background: #f0f2f7;
-    padding: 12px;
+    padding: 14px;
     border-radius: 10px;
     margin-bottom: 10px;
     border-left: 4px solid #0043ce;
     font-weight: 600;
 }
 
+.modal-item strong {
+    color: #a60000;
+}
+
+/* Scrollbar */
 .modal-body::-webkit-scrollbar {
     width: 6px;
 }
@@ -309,7 +293,7 @@ ul, li {
 }
 
 /* ================================
-   LARGE CHART SECTION
+   LARGE CHART SECTION (P3 PIE CHART)
 ================================ */
 .chart-section {
     width: 100%;
@@ -337,21 +321,11 @@ ul, li {
     color: #555;
 }
 
-.chart-label {
-    font-size: 14px;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 8px;
-}
-
 .chart-dropdown {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
     border: 2px solid #a60000;
-    background: white;
 }
 
-/* ================================
-   END OF FILE
-================================ */
+/* END OF FILE */
