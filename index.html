@@ -16,7 +16,6 @@
 
 <!-- Custom CSS -->
 <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body class="bg-[#8A0000] font-inter overflow-x-hidden">
@@ -47,9 +46,7 @@
 
     <!-- ASSET OVERVIEW TITLE -->
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">
-            🚗 ASSET OVERVIEW
-        </div>
+        <div class="flex items-center gap-2 text-xl font-bold">🚗 ASSET OVERVIEW</div>
         <p class="text-gray-600">Fleet asset management and distribution statistics</p>
     </div>
 
@@ -62,7 +59,6 @@
                 <label class="canva-label">HUB LOCATION</label>
                 <select id="hubFilter" class="canva-input"></select>
             </div>
-
             <div>
                 <label class="canva-label">SITE LOCATION</label>
                 <select id="siteFilter" class="canva-input"></select>
@@ -118,15 +114,14 @@
             <div id="vehicleList" class="scroll-body"></div>
         </div>
     </div>
+
 </div>
 
 <!-- JOBSHEET SECTION -->
 <div class="wrapper mt-10">
 
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">
-            📑 JOBSHEET OVERVIEW
-        </div>
+        <div class="flex items-center gap-2 text-xl font-bold">📑 JOBSHEET OVERVIEW</div>
         <p class="text-gray-600">Maintenance and repair job tracking system</p>
     </div>
 
@@ -162,7 +157,7 @@
     </div>
 </div>
 
-<!-- SMALL CHART SECTION (NO ERROR) -->
+<!-- SMALL CHART -->
 <div class="wrapper mt-10">
     <div class="canva-card">
         <div class="card-title mb-3">📊 Asset Chart</div>
@@ -179,8 +174,8 @@
     </div>
 </div>
 
-<!-- LARGE CHART SECTION -->
-<section class="chart-section wrapper">
+<!-- LARGE CHART -->
+<div class="wrapper mt-10 chart-section">
     <div class="chart-card">
         <h2 class="chart-title">📊 ASSET CHARTS</h2>
         <p class="chart-subtitle">Visual analysis of asset distribution</p>
@@ -201,9 +196,9 @@
         <h3 id="chartTitle" class="chart-subtitle">Year Distribution</h3>
         <canvas id="assetChartLarge" height="120"></canvas>
     </div>
-</section>
+</div>
 
-<!-- MODAL DETAIL TK NUMBER -->
+<!-- MODAL -->
 <div id="detailModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -214,7 +209,7 @@
     </div>
 </div>
 
-<!-- JAVASCRIPT -->
+<!-- SCRIPT -->
 <script src="script.js"></script>
 
 </body>
