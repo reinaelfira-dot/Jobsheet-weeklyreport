@@ -6,172 +6,199 @@ const API_URL =
 
 let assetData = [];
 let jobsheetData = [];
-let filteredAssetData = [];
 
-/* FORMAT NUMBER */
+/* -----------------------------------------------------------
+      FORMATTER
+------------------------------------------------------------*/
 function formatNumber(num) {
   return Number(num || 0).toLocaleString("id-ID");
 }
 
-/* TIMESTAMP */
 function nowLabel() {
-  const now = new Date();
-  return now.toLocaleString("id-ID");
+  return new Date().toLocaleString("id-ID");
+}
+
+/* -----------------------------------------------------------
+      LOADER UI FUNCTIONS
+------------------------------------------------------------*/
+function showConnection(status = "connecting") {
+  const box = document.getElementById("connectionStatus");
+
+  if (status === "connecting") {
+    box.classList.remove("hidden");
+    box.innerHTML = `<span class="dot"></span> Connecting...`;
+  }
+  if (status === "hide") {
+    box.classList.add("hidden");
+  }
+}
+
+function showLoadedSummary(text) {
+  const box = document.getElementById("loadedSummary");
+  document.getElementById("loadedMessage").innerText = text;
+
+  box.classList.remove("hidden");
+
+  setTimeout(() => {
+    box.classList.add("hidden");
+  }, 5000);
+}
+
+function showCardLoading() {
+  const ids = [
+    "statusUnitList",
+    "customerList",
+    "locationList",
+    "yearList",
+    "vehicleList"
+  ];
+
+  ids.forEach(id => {
+    document.getElementById(id).innerHTML = `
+      <div class="card-loading">
+        <div class="loader"></div>
+        <p>Loading data...</p>
+      </div>
+    `;
+  });
 }
 
 /* -----------------------------------------------------------
       LOAD DATA (ASSET + JOBSHEET)
 ------------------------------------------------------------*/
 async function loadData() {
-  try {
-    console.log("Loading data...");
+  showConnection("connecting");
+  showCardLoading();
 
-    // LOAD ASSET
+  try {
+    // LOAD ASSETS
     const assetReq = await fetch(API_URL + "?action=asset");
     const assetJson = await assetReq.json();
     assetData = assetJson.data || [];
-    filteredAssetData = assetData;
 
     // LOAD JOBSHEET
     const jsReq = await fetch(API_URL + "?action=jobsheet");
     const jsJson = await jsReq.json();
     jobsheetData = jsJson.data || [];
 
-    console.log("Asset Loaded:", assetData.length);
-    console.log("Jobsheet Loaded:", jobsheetData.length);
-
     document.getElementById("lastAssetUpdate").innerText = nowLabel();
 
-    populateFilters();
-    renderAssetCards(assetData);
+    populateHubFilter();
+    renderAssetCards();
     renderJobsheetSummary();
     renderAssetChart("status");
 
+    showConnection("hide");
+
+    showLoadedSummary(
+      `Data loaded: ${assetData.length} assets, ${jobsheetData.length} jobsheets`
+    );
+
   } catch (err) {
     console.error("LOAD ERROR:", err);
+    showLoadedSummary("❌ Failed to load data");
   }
 }
 
 document.addEventListener("DOMContentLoaded", loadData);
 
 /* -----------------------------------------------------------
-   FILTER DROPDOWN POPULATION
+      FILTER HANDLING (HUB → SITE)
 ------------------------------------------------------------*/
-function populateFilters() {
-    console.log("Populating filter dropdowns...");
+function populateHubFilter() {
+  const hubs = [...new Set(assetData.map(a => a["HUB"] || "Unknown"))].sort();
+  const hubFilter = document.getElementById("hubFilter");
 
-    const hubSet = new Set(assetData.map(x => x["HUB"] || "Unknown"));
-    const siteSet = new Set(assetData.map(x => x["Alt Location"] || "Unknown"));
+  hubFilter.innerHTML = `<option value="ALL">All HUBs</option>` +
+    hubs.map(h => `<option value="${h}">${h}</option>`).join("");
 
-    const hub = document.getElementById("hubFilter");
-    const site = document.getElementById("siteFilter");
-
-    hub.innerHTML = `<option value="All">All HUBs</option>`;
-    site.innerHTML = `<option value="All">All Sites</option>`;
-
-    hubSet.forEach(h => hub.innerHTML += `<option value="${h}">${h}</option>`);
-    siteSet.forEach(s => site.innerHTML += `<option value="${s}">${s}</option>`);
+  populateSiteFilter("ALL");
 }
 
-/* -----------------------------------------------------------
-   SITE follows HUB
-------------------------------------------------------------*/
-function updateSiteFilterByHub() {
-    const selectedHub = document.getElementById("hubFilter").value;
-    const site = document.getElementById("siteFilter");
+function populateSiteFilter(selectedHub) {
+  let filtered = assetData;
 
-    if (selectedHub === "All") {
-        populateFilters();
-        return;
-    }
-
-    const filteredSites = new Set(
-        assetData
-        .filter(x => x["HUB"] === selectedHub)
-        .map(x => x["Alt Location"])
-    );
-
-    site.innerHTML = `<option value="All">All Sites</option>`;
-
-    filteredSites.forEach(s => {
-        site.innerHTML += `<option value="${s}">${s}</option>`;
-    });
-}
-
-/* -----------------------------------------------------------
-   FILTER LOGIC
-------------------------------------------------------------*/
-function filterAssets() {
-    let hub = document.getElementById("hubFilter").value;
-    let site = document.getElementById("siteFilter").value;
-
-    let data = [...assetData];
-
-    if (hub !== "All") {
-        data = data.filter(x => x["HUB"] === hub);
-    }
-
-    if (site !== "All") {
-        data = data.filter(x => x["Alt Location"] === site);
-    }
-
-    filteredAssetData = data;
-
-    renderAssetCards(filteredAssetData);
-    renderAssetChart(document.getElementById("chartSelector").value);
-}
-
-/* -----------------------------------------------------------
-   RESET FILTER
-------------------------------------------------------------*/
-function resetFilters() {
-    populateFilters();
-    filteredAssetData = assetData;
-    renderAssetCards(assetData);
-    renderAssetChart("status");
-}
-
-/* -----------------------------------------------------------
-   RENDER GROUP (Status, Customer, Year, etc)
-------------------------------------------------------------*/
-function renderAssetCards(data) {
-  function groupRender(listId, totalId, key) {
-    const map = {};
-
-    data.forEach(row => {
-      const val = row[key] || "Unknown";
-      map[val] = (map[val] || 0) + 1;
-    });
-
-    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
-
-    document.getElementById(totalId).innerText = formatNumber(data.length) + " Units";
-
-    let html = "";
-    sorted.forEach(([name, count]) => {
-      html += `
-        <div class="list-item">
-            <span>${name}</span>
-            <span class="item-badge">${formatNumber(count)}</span>
-        </div>`;
-    });
-
-    document.getElementById(listId).innerHTML = html;
+  if (selectedHub !== "ALL") {
+    filtered = assetData.filter(a => a["HUB"] === selectedHub);
   }
 
-  groupRender("statusUnitList", "statusUnitTotal", "Status");
-  groupRender("customerList", "customerTotal", "Customer");
-  groupRender("locationList", "locationTotal", "Alt Location");
-  groupRender("yearList", "yearTotal", "Year");
-  groupRender("vehicleList", "vehicleTotal", "Vehicle Type");
+  const sites = [...new Set(filtered.map(a => a["Alt Location"] || "Unknown"))].sort();
+
+  const siteFilter = document.getElementById("siteFilter");
+  siteFilter.innerHTML =
+    `<option value="ALL">All Sites</option>` +
+    sites.map(s => `<option value="${s}">${s}</option>`).join("");
+}
+
+document.getElementById("hubFilter").addEventListener("change", (e) => {
+  populateSiteFilter(e.target.value);
+});
+
+/* -----------------------------------------------------------
+      APPLY FILTER
+------------------------------------------------------------*/
+document.getElementById("applyAssetFilter").addEventListener("click", () => {
+  const hub = document.getElementById("hubFilter").value;
+  const site = document.getElementById("siteFilter").value;
+
+  let filtered = assetData;
+
+  if (hub !== "ALL") filtered = filtered.filter(r => r["HUB"] === hub);
+  if (site !== "ALL") filtered = filtered.filter(r => r["Alt Location"] === site);
+
+  renderAssetCards(filtered);
+  renderAssetChart("status", filtered);
+});
+
+document.getElementById("resetAssetFilter").addEventListener("click", () => {
+  document.getElementById("hubFilter").value = "ALL";
+  populateSiteFilter("ALL");
+  renderAssetCards(assetData);
+  renderAssetChart("status", assetData);
+});
+
+/* -----------------------------------------------------------
+   ASSET OVERVIEW LIST RENDER
+------------------------------------------------------------*/
+function renderGroup(listId, totalId, key, dataset = assetData) {
+  const map = {};
+
+  dataset.forEach((row) => {
+    const val = row[key] || "Unknown";
+    map[val] = (map[val] || 0) + 1;
+  });
+
+  const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+  document.getElementById(totalId).innerText =
+    formatNumber(dataset.length) + " Units";
+
+  let html = "";
+  sorted.forEach(([name, count]) => {
+    html += `
+      <div class="list-item">
+          <span>${name}</span>
+          <span class="item-badge">${formatNumber(count)}</span>
+      </div>`;
+  });
+
+  document.getElementById(listId).innerHTML = html;
+}
+
+function renderAssetCards(dataset = assetData) {
+  renderGroup("statusUnitList", "statusUnitTotal", "Status", dataset);
+  renderGroup("customerList", "customerTotal", "Customer", dataset);
+  renderGroup("locationList", "locationTotal", "Alt Location", dataset);
+  renderGroup("yearList", "yearTotal", "Year", dataset);
+  renderGroup("vehicleList", "vehicleTotal", "Vehicle Type", dataset);
 }
 
 /* -----------------------------------------------------------
-      JOBSHEET SUMMARY
+      JOBSHEET SUMMARY RENDER
 ------------------------------------------------------------*/
 function renderJobsheetSummary() {
   function countContains(col, str) {
-    return jobsheetData.filter(x => x[col]?.toLowerCase().includes(str)).length;
+    return jobsheetData.filter((x) => x[col]?.toLowerCase().includes(str)).length;
   }
 
   const p1 = countContains("Category (P1,P2,P3/Ready Stock)", "p1");
@@ -180,7 +207,10 @@ function renderJobsheetSummary() {
   const repair = countContains("VCR", "repair");
 
   const totalCost = jobsheetData.reduce((sum, x) => {
-    return sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0);
+    return (
+      sum +
+      (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0)
+    );
   }, 0);
 
   document.getElementById("p1CountJS").innerText = p1;
@@ -191,23 +221,21 @@ function renderJobsheetSummary() {
 }
 
 /* -----------------------------------------------------------
-      CHART (CANVA STYLE)
+      CANVA-STYLE BAR CHART
 ------------------------------------------------------------*/
 let assetChart;
 
-function renderAssetChart(type) {
-  const keyMap = {
+function renderAssetChart(type, dataset = assetData) {
+  const key = {
     status: "Status",
     customer: "Customer",
     location: "Alt Location",
     vehicle: "Vehicle Type",
     year: "Year"
-  };
+  }[type];
 
-  const key = keyMap[type];
   const map = {};
-
-  filteredAssetData.forEach(r => {
+  dataset.forEach((r) => {
     const v = r[key] || "Unknown";
     map[v] = (map[v] || 0) + 1;
   });
@@ -222,12 +250,14 @@ function renderAssetChart(type) {
     type: "bar",
     data: {
       labels,
-      datasets: [{
-        label: "Units",
-        data: values,
-        backgroundColor: "#A60000",
-        borderRadius: 10,
-      }],
+      datasets: [
+        {
+          label: "Units",
+          data: values,
+          backgroundColor: "#A60000",
+          borderRadius: 10,
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -236,13 +266,6 @@ function renderAssetChart(type) {
     },
   });
 }
-
-/* -----------------------------------------------------------
-      EVENT LISTENERS
-------------------------------------------------------------*/
-document.getElementById("hubFilter").addEventListener("change", updateSiteFilterByHub);
-document.getElementById("applyAssetFilter").addEventListener("click", filterAssets);
-document.getElementById("resetAssetFilter").addEventListener("click", resetFilters);
 
 document.getElementById("chartSelector").addEventListener("change", (e) => {
   renderAssetChart(e.target.value);
