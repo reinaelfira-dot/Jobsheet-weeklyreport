@@ -1,321 +1,43 @@
-/* ==========================================================
-   GLOBAL STYLE
-========================================================== */
-
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #8A0000;
-    margin: 0;
-    padding: 0;
+/* ================================
+   CHART SECTION
+================================ */
+.chart-section {
+    width: 100%;
+    margin-top: 40px;
 }
 
-.wrapper {
-    width: 92%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px 0 60px 0;
-}
-
-/* ==========================================================
-   CARD BASE STYLE
-========================================================== */
-
-.canva-card {
+.chart-card {
     background: #ffffff;
-    border-radius: 22px;
-    padding: 26px;
-    margin-bottom: 25px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-    overflow: hidden; /* Prevent scroll overflow */
-}
-
-.card-title {
-    font-size: 20px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ==========================================================
-   FILTER INPUT FIELDS
-========================================================== */
-
-.canva-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-}
-
-.canva-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 2px solid #ddd;
+    padding: 22px;
     border-radius: 14px;
-    font-size: 14px;
-    margin-top: 4px;
-    outline: none;
+    margin-bottom: 22px;
+    box-shadow: 0 0 0 4px #8b0000;
 }
 
-.canva-input:focus {
-    border-color: #a60000;
-}
-
-/* BUTTONS */
-
-.canva-btn-primary {
-    background: #a60000;
-    color: white;
-    padding: 11px 22px;
-    font-weight: 600;
-    border-radius: 12px;
-}
-
-.canva-btn-outline {
-    background: transparent;
-    border: 2px solid #a60000;
-    color: #a60000;
-    padding: 10px 22px;
-    font-weight: 600;
-    border-radius: 12px;
-}
-
-/* ==========================================================
-   TOP RIGHT BADGE (TOTAL)
-========================================================== */
-
-.unit-badge {
-    background: #a60000;
-    color: #fff;
-    padding: 6px 18px;
-    border-radius: 20px;
+.chart-title {
+    font-size: 24px;
     font-weight: 700;
-    float: right;
-}
-
-/* ==========================================================
-   LIST CARD SCROLL AREA
-========================================================== */
-
-.scroll-card {
-    position: relative;
-    max-height: 380px;
-    overflow-y: auto;
-    padding-right: 6px;
-}
-
-/* Custom Scrollbar */
-.scroll-card::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scroll-card::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.scroll-card::-webkit-scrollbar-thumb {
-    background: #b30000;
-    border-radius: 10px;
-}
-
-/* ==========================================================
-   LIST ITEM STYLE
-========================================================== */
-
-.list-item {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    background: #f7f7f7;
-    padding: 14px 18px;
-    border-radius: 16px;
-    margin-bottom: 12px;
-
-    font-size: 16px;
     color: #222;
-
-    list-style: none; /* Remove bullet */
+    margin-bottom: 4px;
 }
 
-/* Name (left side) */
-.list-item span:first-child {
+.chart-subtitle {
+    font-size: 15px;
     font-weight: 500;
+    color: #555;
 }
 
-/* Number badge */
-.item-badge {
-    background: #a60000;
-    color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-weight: 700;
-    min-width: 48px;
-    text-align: center;
-}
-
-/* ==========================================================
-   LOADING UI
-========================================================== */
-
-.card-loading {
-    width: 100%;
-    text-align: center;
-    padding: 20px 0 30px 0;
-}
-
-.loader {
-    width: 36px;
-    height: 36px;
-    border: 4px solid #ddd;
-    border-top-color: #a60000;
-    border-radius: 50%;
-    margin: 0 auto 10px auto;
-    animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.card-loading p {
-    color: #666;
+.chart-label {
     font-size: 14px;
-    margin-top: 5px;
-}
-
-/* ==========================================================
-   CONNECTION STATUS BADGE
-========================================================== */
-
-#connectionStatus {
-    background: #ffe5e5;
-    padding: 8px 16px;
-    border-radius: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
     font-weight: 600;
-    color: #a60000;
-    margin: 12px 0;
+    display: block;
+    margin-bottom: 8px;
 }
 
-#connectionStatus.hidden {
-    display: none;
+.chart-dropdown {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #a60000;
 }
 
-.dot {
-    width: 10px;
-    height: 10px;
-    background: #a60000;
-    border-radius: 50%;
-}
-
-/* Loaded Summary */
-#loadedSummary {
-    background: #eaffea;
-    border-left: 4px solid #2ac200;
-    padding: 12px 16px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 15px;
-    font-weight: 600;
-}
-
-#loadedSummary.hidden {
-    display: none;
-}
-
-/* ==========================================================
-   SUMMARY CARDS (JOBSHEET)
-========================================================== */
-
-.summary-card {
-    background: linear-gradient(to bottom, #ffbaba, #a60000);
-    color: white;
-    padding: 20px;
-    border-radius: 20px;
-    text-align: center;
-}
-
-.summary-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.summary-value {
-    font-size: 34px;
-    font-weight: 800;
-}
-
-.summary-sub {
-    font-size: 13px;
-    opacity: 0.85;
-    margin-top: 6px;
-}
-
-/* ==========================================================
-   CHART
-========================================================== */
-
-#assetChart {
-    margin-top: 15px;
-}
-/* ===== FIX BULLET DOTS (HILANGKAN TITIK •) ===== */
-.list-item {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    background: #f7f7f7;
-    padding: 14px 20px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-
-    /* Hapus bullet */
-    list-style: none !important;
-}
-
-/* Pastikan parent list juga tidak menampilkan bullet */
-#statusUnitList,
-#customerList,
-#locationList,
-#yearList,
-#vehicleList {
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-}
-
-/* Badge */
-.item-badge {
-    background: #a60000;
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-/* Card wrapper rapi seperti Canva */
-.scroll-body {
-    max-height: 330px;
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-/* Scrollbar rapi */
-.scroll-body::-webkit-scrollbar {
-    width: 6px;
-}
-.scroll-body::-webkit-scrollbar-thumb {
-    background: #b30000;
-    border-radius: 4px;
-}
-.scroll-body::-webkit-scrollbar-track {
-    background: transparent;
-}
