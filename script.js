@@ -186,7 +186,7 @@ function renderGroup(listId, totalId, key, dataset = assetData) {
 }
 
 function renderAssetCards(dataset = assetData) {
-  renderGroup("statusUnitList", "statusUnitTotal", "Status", dataset);
+  renderGroup("statusUnitList", "statusUnitTotal", "Status Unit 3", dataset);
   renderGroup("customerList", "customerTotal", "Customer", dataset);
   renderGroup("locationList", "locationTotal", "Alt Location", dataset);
   renderGroup("yearList", "yearTotal", "Year", dataset);
@@ -227,7 +227,7 @@ let assetChart;
 
 function renderAssetChart(type, dataset = assetData) {
   const key = {
-    status: "Status",
+    status: "Status Unit 3",
     customer: "Customer",
     location: "Alt Location",
     vehicle: "Vehicle Type",
