@@ -15,6 +15,7 @@ let assetChartLarge = null;
 function formatNumber(num) {
   return Number(num || 0).toLocaleString("id-ID");
 }
+
 function nowLabel() {
   return new Date().toLocaleString("id-ID");
 }
@@ -51,7 +52,7 @@ function showCardLoading() {
     "vehicleList"
   ];
 
-  ids.forEach(id => {
+  ids.forEach((id) => {
     document.getElementById(id).innerHTML = `
       <div class="card-loading">
           <div class="loader"></div>
@@ -61,7 +62,7 @@ function showCardLoading() {
 }
 
 /* -----------------------------------------------------------
-      LOAD DATA
+      LOAD DATA ON START
 ------------------------------------------------------------*/
 document.addEventListener("DOMContentLoaded", loadData);
 
@@ -90,7 +91,6 @@ async function loadData() {
     showLoadedSummary(
       `Data loaded: ${assetData.length} assets, ${jobsheetData.length} jobsheets`
     );
-
   } catch (err) {
     console.error("LOAD ERROR:", err);
     showLoadedSummary("❌ Failed to load data");
@@ -101,27 +101,29 @@ async function loadData() {
       HUB → SITE FILTER
 ------------------------------------------------------------*/
 function populateHubFilter() {
-  const hubs = [...new Set(assetData.map(a => a["HUB"] || "Unknown"))].sort();
+  const hubs = [...new Set(assetData.map((a) => a["HUB"] || "Unknown"))].sort();
+
   document.getElementById("hubFilter").innerHTML =
     `<option value="ALL">All HUBs</option>` +
-    hubs.map(h => `<option value="${h}">${h}</option>`).join("");
+    hubs.map((h) => `<option value="${h}">${h}</option>`).join("");
 
   populateSiteFilter("ALL");
 }
 
 function populateSiteFilter(selectedHub) {
-  let filtered = selectedHub === "ALL"
-    ? assetData
-    : assetData.filter(a => a["HUB"] === selectedHub);
+  let filtered =
+    selectedHub === "ALL"
+      ? assetData
+      : assetData.filter((a) => a["HUB"] === selectedHub);
 
-  const sites = [...new Set(filtered.map(a => a["Alt Location"] || "Unknown"))].sort();
+  const sites = [...new Set(filtered.map((a) => a["Alt Location"] || "Unknown"))].sort();
 
   document.getElementById("siteFilter").innerHTML =
     `<option value="ALL">All Sites</option>` +
-    sites.map(s => `<option value="${s}">${s}</option>`).join("");
+    sites.map((s) => `<option value="${s}">${s}</option>`).join("");
 }
 
-document.getElementById("hubFilter").addEventListener("change", e => {
+document.getElementById("hubFilter").addEventListener("change", (e) => {
   populateSiteFilter(e.target.value);
 });
 
@@ -133,8 +135,10 @@ document.getElementById("applyAssetFilter").addEventListener("click", () => {
   const site = document.getElementById("siteFilter").value;
 
   let filtered = assetData;
-  if (hub !== "ALL") filtered = filtered.filter(r => r["HUB"] === hub);
-  if (site !== "ALL") filtered = filtered.filter(r => r["Alt Location"] === site);
+
+  if (hub !== "ALL") filtered = filtered.filter((r) => r["HUB"] === hub);
+  if (site !== "ALL")
+    filtered = filtered.filter((r) => r["Alt Location"] === site);
 
   renderAssetCards(filtered);
   renderAssetChart("status", filtered);
@@ -151,7 +155,7 @@ document.getElementById("resetAssetFilter").addEventListener("click", () => {
 });
 
 /* -----------------------------------------------------------
-      RENDER CARD LISTS
+      TK MODAL
 ------------------------------------------------------------*/
 function getTK(row) {
   return row["TK No."] || row["TK No"] || row["TK"] || "";
@@ -163,7 +167,7 @@ function openDetailModal(title, tkList) {
 
   const body = document.getElementById("modalBody");
   body.innerHTML = tkList
-    .map(t => `<div class="modal-item">${t}</div>`)
+    .map((t) => `<div class="modal-item">${t}</div>`)
     .join("");
 
   modal.classList.add("show");
@@ -173,10 +177,13 @@ document.getElementById("closeModal").addEventListener("click", () => {
   document.getElementById("detailModal").classList.remove("show");
 });
 
+/* -----------------------------------------------------------
+      RENDER GROUP LIST CARDS
+------------------------------------------------------------*/
 function renderGroup(listId, totalId, key, labelTitle, dataset) {
   const groupMap = {};
 
-  dataset.forEach(r => {
+  dataset.forEach((r) => {
     const k = r[key] || "Unknown";
     if (!groupMap[k]) groupMap[k] = { count: 0, tk: [] };
     groupMap[k].count++;
@@ -185,15 +192,19 @@ function renderGroup(listId, totalId, key, labelTitle, dataset) {
 
   const sorted = Object.entries(groupMap).sort((a, b) => b[1].count - a[1].count);
 
-  document.getElementById(totalId).innerText = formatNumber(dataset.length) + " Units";
+  document.getElementById(totalId).innerText =
+    formatNumber(dataset.length) + " Units";
 
   document.getElementById(listId).innerHTML = sorted
-    .map(([name, obj]) => `
-      <div class="list-item clickable" 
-           onclick='openDetailModal("${labelTitle}: ${name}", ${JSON.stringify(obj.tk)})'>
+    .map(
+      ([name, obj]) => `
+      <div class="list-item" onclick='openDetailModal("${labelTitle}: ${name}", ${JSON.stringify(
+        obj.tk
+      )})'>
           <span>${name}</span>
           <span class="item-badge">${formatNumber(obj.count)}</span>
-      </div>`)
+      </div>`
+    )
     .join("");
 }
 
@@ -210,7 +221,7 @@ function renderAssetCards(dataset) {
 ------------------------------------------------------------*/
 function renderJobsheetSummary() {
   function countContains(col, str) {
-    return jobsheetData.filter(x => x[col]?.toLowerCase().includes(str)).length;
+    return jobsheetData.filter((x) => x[col]?.toLowerCase().includes(str)).length;
   }
 
   document.getElementById("p1CountJS").innerText =
@@ -225,14 +236,18 @@ function renderJobsheetSummary() {
   document.getElementById("repairCountJS").innerText =
     countContains("VCR", "repair");
 
-  const totalCost = jobsheetData.reduce((sum, x) =>
-    sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0), 0);
+  const totalCost = jobsheetData.reduce(
+    (sum, x) =>
+      sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0),
+    0
+  );
 
-  document.getElementById("totalCostJS").innerText = "Rp " + formatNumber(totalCost);
+  document.getElementById("totalCostJS").innerText =
+    "Rp " + formatNumber(totalCost);
 }
 
 /* -----------------------------------------------------------
-      SMALL CHART (CARD)
+      SMALL CHART – WITH PERCENTAGE LABELS
 ------------------------------------------------------------*/
 function renderAssetChart(type, dataset = assetData) {
   const keyMap = {
@@ -240,24 +255,27 @@ function renderAssetChart(type, dataset = assetData) {
     customer: "Customer",
     location: "Alt Location",
     vehicle: "Vehicle Type",
-    year: "Year"
+    year: "Year",
   };
 
   const key = keyMap[type];
+
   const map = {};
-  dataset.forEach(r => {
+  dataset.forEach((r) => {
     const v = r[key] || "Unknown";
     map[v] = (map[v] || 0) + 1;
   });
 
   const labels = Object.keys(map);
   const values = Object.values(map);
+  const total = values.reduce((x, y) => x + y, 0);
 
   const ctx = document.getElementById("assetChart").getContext("2d");
   if (assetChart) assetChart.destroy();
 
   assetChart = new Chart(ctx, {
     type: "bar",
+    plugins: [ChartDataLabels],
     data: {
       labels,
       datasets: [
@@ -265,81 +283,91 @@ function renderAssetChart(type, dataset = assetData) {
           label: "Units",
           data: values,
           backgroundColor: "#A60000",
-          borderRadius: 10
-        }
-      ]
+          borderRadius: 10,
+        },
+      ],
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true } }
-    }
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: "#000",
+          anchor: "end",
+          align: "top",
+          formatter: (val) => ((val / total) * 100).toFixed(1) + "%",
+        },
+      },
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
   });
 }
 
-document.getElementById("chartSelector").addEventListener("change", e => {
+document.getElementById("chartSelector").addEventListener("change", (e) => {
   renderAssetChart(e.target.value, assetData);
 });
 
 /* -----------------------------------------------------------
-      LARGE CHART (SECTION B)
+      LARGE CHART – WITH PERCENTAGE LABELS
 ------------------------------------------------------------*/
-document.getElementById("assetChartSelector").addEventListener("change", e => {
+document.getElementById("assetChartSelector").addEventListener("change", (e) => {
   renderLargeAssetChart(e.target.value, assetData);
 });
 
 function renderLargeAssetChart(type = "year", dataset = assetData) {
-  const keys = {
+  const keyMap = {
     year: "Year",
     status: "Status Unit 3",
     customer: "Customer",
     location: "Alt Location",
-    vehicle: "Vehicle Type"
+    vehicle: "Vehicle Type",
   };
 
-  const key = keys[type];
-  const map = {};
+  const key = keyMap[type];
 
-  dataset.forEach(r => {
+  const map = {};
+  dataset.forEach((r) => {
     const v = r[key] || "Unknown";
     map[v] = (map[v] || 0) + 1;
   });
 
   const labels = Object.keys(map);
   const values = Object.values(map);
-  const total = values.reduce((a,b)=>a+b,0);
+  const total = values.reduce((x, y) => x + y, 0);
 
   const ctx = document.getElementById("assetChartLarge").getContext("2d");
   if (assetChartLarge) assetChartLarge.destroy();
 
   assetChartLarge = new Chart(ctx, {
     type: "bar",
+    plugins: [ChartDataLabels],
     data: {
       labels,
-      datasets: [{
-        label: "Units",
-        data: values,
-        backgroundColor: "#b30000",
-        borderRadius: 12
-      }]
+      datasets: [
+        {
+          label: "Units",
+          data: values,
+          backgroundColor: "#b30000",
+          borderRadius: 12,
+        },
+      ],
     },
     options: {
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => {
-              let val = ctx.raw;
-              let pct = ((val / total) * 100).toFixed(1);
-              return `${val} units (${pct}%)`;
-            }
-          }
-        }
+        datalabels: {
+          color: "#000",
+          anchor: "end",
+          align: "top",
+          formatter: (val) => ((val / total) * 100).toFixed(1) + "%",
+        },
       },
       scales: {
-        y: { beginAtZero: true }
-      }
-    }
+        y: { beginAtZero: true },
+      },
+    },
   });
 
   document.getElementById("chartTitle").innerText =
