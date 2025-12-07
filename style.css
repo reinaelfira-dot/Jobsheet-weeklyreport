@@ -45,44 +45,51 @@ body {
 
 
 /* SCROLLABLE CARD CONTENT */
+/* -----------------------------------------
+   FIX: Scrollbar Tidak Keluar Dari Card
+------------------------------------------*/
+
 .scroll-card {
-    max-height: 350px;
+    position: relative;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 0; /* padding dihapus supaya scroll-body tidak overflow */
+    overflow: hidden; /* penting! mencegah scrollbar keluar frame */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 .scroll-body {
+    max-height: 260px; /* tinggi area konten scroll */
     overflow-y: auto;
-    margin-top: 15px;
-    padding-right: 5px;
-    height: 290px;
+    padding: 14px 22px; /* padding dalam */
+    box-sizing: border-box;
 }
 
-/* SCROLLBAR CUSTOM */
+/* Scrollbar styling */
 .scroll-body::-webkit-scrollbar {
     width: 6px;
 }
 
 .scroll-body::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 100px;
+    background: transparent;
+    margin-top: 14px;      /* agar scrollbar tidak menyentuh ujung card */
+    margin-bottom: 14px;
 }
 
 .scroll-body::-webkit-scrollbar-thumb {
     background: #A60000;
-    border-radius: 100px;
+    border-radius: 8px;
 }
 
-/* ITEM LIST DALAM CARD */
+/* List-item agar spacing simetris */
 .list-item {
-    background: #f9f9f9;
-    margin-bottom: 10px;
+    background: #f8f8f8;
     padding: 14px 18px;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 600;
+    margin-bottom: 10px;
+    border-radius: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: 0.2s;
 }
 
 .list-item:hover {
