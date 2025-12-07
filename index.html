@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PT Transkon Jaya – Fleet Management Dashboard</title>
 
-<!-- TailwindCSS -->
+<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Google Font -->
@@ -14,10 +13,10 @@
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <!-- Custom CSS -->
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body class="bg-[#8A0000] font-inter overflow-x-hidden">
@@ -32,11 +31,12 @@
     </p>
 </section>
 
-<!-- CONNECTION STATUS -->
+<!-- GLOBAL CONNECTION STATUS -->
 <div id="connectionStatus" class="connection-badge hidden">
     <span class="dot"></span> Connecting...
 </div>
 
+<!-- GLOBAL LOADED SUMMARY -->
 <div id="loadedSummary" class="loaded-badge hidden">
     <span class="check">✔</span>
     <span id="loadedMessage">Data loaded.</span>
@@ -45,99 +45,108 @@
 <!-- WRAPPER -->
 <div class="wrapper">
 
-    <!-- ASSET OVERVIEW -->
-    <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">🚗 ASSET OVERVIEW</div>
-        <p class="text-gray-600">Fleet asset management and distribution statistics</p>
+<!-- ======================
+      ASSET CHART TOP
+======================= -->
+<div class="canva-card mt-8">
+    <div class="card-title mb-3">📊 Asset Chart</div>
+
+    <select id="chartSelector" class="canva-input mb-4">
+        <option value="status">Status Unit</option>
+        <option value="customer">Customer</option>
+        <option value="location">Location</option>
+        <option value="vehicle">Vehicle Type</option>
+        <option value="year">Year</option>
+    </select>
+
+    <canvas id="assetChart" height="150"></canvas>
+</div>
+
+<!-- ASSET OVERVIEW TITLE -->
+<div class="canva-card mt-10">
+    <div class="flex items-center gap-2 text-xl font-bold">
+        🚗 ASSET OVERVIEW
     </div>
+    <p class="text-gray-600">Fleet asset management and distribution statistics</p>
+</div>
 
-    <!-- FILTER -->
-    <div class="canva-card mt-6">
-        <h3 class="text-xl font-bold flex items-center gap-2 mb-3">🔍 Filter Asset Data</h3>
+<!-- FILTER ASSET -->
+<div class="canva-card mt-6">
+    <h3 class="text-xl font-bold flex items-center gap-2 mb-3">🔍 Filter Asset Data</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label class="canva-label">HUB LOCATION</label>
-                <select id="hubFilter" class="canva-input"></select>
-            </div>
-
-            <div>
-                <label class="canva-label">SITE LOCATION</label>
-                <select id="siteFilter" class="canva-input"></select>
-            </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <label class="canva-label">HUB LOCATION</label>
+            <select id="hubFilter" class="canva-input"></select>
         </div>
 
-        <div class="flex gap-3 mt-6">
-            <button id="applyAssetFilter" class="canva-btn-primary">✓ Apply Filter</button>
-            <button id="resetAssetFilter" class="canva-btn-outline">⭮ Reset</button>
-
-            <div class="ml-auto text-sm text-gray-500 flex items-center gap-1">
-                📅 Last Update:
-                <span id="lastAssetUpdate">-</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- CHART SECTION (Di Atas JOBSHEET) -->
-    <div class="canva-card mt-8">
-        <div class="card-title mb-3">📊 Asset Chart</div>
-
-        <select id="chartSelector" class="canva-input mb-4">
-            <option value="year">Year</option>
-            <option value="status">Status Unit</option>
-            <option value="customer">Customer</option>
-            <option value="location">Location</option>
-            <option value="vehicle">Vehicle Type</option>
-        </select>
-
-        <canvas id="assetChart" height="130"></canvas>
-    </div>
-
-    <!-- STATUS + CUSTOMER -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div class="canva-card scroll-card">
-            <div class="card-title">📊 Status Unit</div>
-            <span class="unit-badge" id="statusUnitTotal">0 Units</span>
-            <div id="statusUnitList" class="scroll-body"></div>
-        </div>
-
-        <div class="canva-card scroll-card">
-            <div class="card-title">👥 Customer</div>
-            <span class="unit-badge" id="customerTotal">0 Units</span>
-            <div id="customerList" class="scroll-body"></div>
+        <div>
+            <label class="canva-label">SITE LOCATION</label>
+            <select id="siteFilter" class="canva-input"></select>
         </div>
     </div>
 
-    <!-- LOCATION + YEAR -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div class="canva-card scroll-card">
-            <div class="card-title">📍 Location</div>
-            <span class="unit-badge" id="locationTotal">0 Units</span>
-            <div id="locationList" class="scroll-body"></div>
-        </div>
+    <div class="flex gap-3 mt-6">
+        <button id="applyAssetFilter" class="canva-btn-primary">✓ Apply Filter</button>
+        <button id="resetAssetFilter" class="canva-btn-outline">⭮ Reset</button>
 
-        <div class="canva-card scroll-card">
-            <div class="card-title">📅 Year</div>
-            <span class="unit-badge" id="yearTotal">0 Units</span>
-            <div id="yearList" class="scroll-body"></div>
+        <div class="ml-auto text-sm text-gray-500 flex items-center gap-1">
+            📅 Last Update:
+            <span id="lastAssetUpdate">-</span>
         </div>
     </div>
+</div>
 
-    <!-- VEHICLE -->
-    <div class="grid grid-cols-1 mt-6">
-        <div class="canva-card scroll-card">
-            <div class="card-title">🚗 Vehicle Type</div>
-            <span class="unit-badge" id="vehicleTotal">0 Units</span>
-            <div id="vehicleList" class="scroll-body"></div>
-        </div>
+<!-- STATUS + CUSTOMER -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <div class="canva-card scroll-card">
+        <div class="card-title">📊 Status Unit</div>
+        <span class="unit-badge" id="statusUnitTotal">0 Units</span>
+        <div id="statusUnitList" class="scroll-body"></div>
     </div>
+
+    <div class="canva-card scroll-card">
+        <div class="card-title">👥 Customer</div>
+        <span class="unit-badge" id="customerTotal">0 Units</span>
+        <div id="customerList" class="scroll-body"></div>
+    </div>
+</div>
+
+<!-- LOCATION + YEAR -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <div class="canva-card scroll-card">
+        <div class="card-title">📍 Location</div>
+        <span class="unit-badge" id="locationTotal">0 Units</span>
+        <div id="locationList" class="scroll-body"></div>
+    </div>
+
+    <div class="canva-card scroll-card">
+        <div class="card-title">📅 Year</div>
+        <span class="unit-badge" id="yearTotal">0 Units</span>
+        <div id="yearList" class="scroll-body"></div>
+    </div>
+</div>
+
+<!-- VEHICLE TYPE -->
+<div class="grid grid-cols-1 mt-6">
+    <div class="canva-card scroll-card">
+        <div class="card-title">🚗 Vehicle Type</div>
+        <span class="unit-badge" id="vehicleTotal">0 Units</span>
+        <div id="vehicleList" class="scroll-body"></div>
+    </div>
+</div>
 
 </div>
 
-<!-- JOBSHEET SECTION -->
+<!-- ======================
+   JOBSHEET SECTION
+======================= -->
 <div class="wrapper mt-10">
+
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">📑 JOBSHEET OVERVIEW</div>
+        <div class="flex items-center gap-2 text-xl font-bold">
+            📑 JOBSHEET OVERVIEW
+        </div>
         <p class="text-gray-600">Maintenance and repair job tracking system</p>
     </div>
 
@@ -173,7 +182,31 @@
     </div>
 </div>
 
-<!-- MODAL DETAIL TK -->
+<!-- LARGE CHART SECTION -->
+<section class="chart-section wrapper">
+    <div class="chart-card">
+        <h2 class="chart-title">📊 Asset Distribution</h2>
+        <p class="chart-subtitle">Percentage breakdown of selected category</p>
+    </div>
+
+    <div class="chart-card">
+        <label class="chart-label">Select Chart Type</label>
+        <select id="assetChartSelector" class="chart-dropdown">
+            <option value="year">Year</option>
+            <option value="status">Status Unit</option>
+            <option value="customer">Customer</option>
+            <option value="location">Location</option>
+            <option value="vehicle">Vehicle Type</option>
+        </select>
+    </div>
+
+    <div class="chart-card">
+        <h3 id="chartTitle" class="chart-subtitle">Year Distribution</h3>
+        <canvas id="assetChartLarge" height="120"></canvas>
+    </div>
+</section>
+
+<!-- MODAL DETAIL -->
 <div id="detailModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -184,7 +217,7 @@
     </div>
 </div>
 
-<!-- MAIN SCRIPT -->
+<!-- JS -->
 <script src="script.js"></script>
 
 </body>
