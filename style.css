@@ -1,5 +1,301 @@
 /* ================================
-   CHART SECTION
+   GLOBAL STYLING
+================================ */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Wrapper */
+.wrapper {
+    max-width: 1050px;
+    margin: 40px auto;
+    padding: 0 15px;
+}
+
+/* Remove list bullets globally */
+ul, li {
+    list-style: none !important;
+}
+
+/* ================================
+   Canva Card Style
+================================ */
+.canva-card {
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 0 0 4px #8b0000;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* ================================
+   Filter Fields
+================================ */
+.canva-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #a60000;
+    outline: none;
+}
+
+.canva-input:focus {
+    border-color: #7a0000;
+}
+
+.canva-label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+    color: #444;
+}
+
+.canva-btn-primary {
+    background: #a60000;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.canva-btn-outline {
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: 2px solid #a60000;
+    color: #a60000;
+    font-weight: 600;
+}
+
+/* ================================
+   Scrollable Cards
+================================ */
+.scroll-card {
+    position: relative;
+    max-height: 360px;
+}
+
+.scroll-body {
+    margin-top: 12px;
+    overflow-y: auto;
+    max-height: 300px;
+    padding-right: 6px;
+}
+
+.scroll-body::-webkit-scrollbar {
+    width: 6px;
+}
+.scroll-body::-webkit-scrollbar-thumb {
+    background: #a60000;
+    border-radius: 10px;
+}
+
+/* ================================
+   List Item
+================================ */
+.list-item {
+    background: #f7f8fa;
+    padding: 14px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    align-items: center;
+    transition: 0.15s;
+}
+
+.list-item:hover {
+    background: #eceff3;
+    cursor: pointer;
+}
+
+.item-badge {
+    background: #a60000;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* Top Badge (Total Units) */
+.unit-badge {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    background: #a60000;
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ================================
+   Loading Animation
+================================ */
+.card-loading {
+    text-align: center;
+    padding: 20px;
+}
+
+.loader {
+    border: 4px solid #ddd;
+    border-top: 4px solid #a60000;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    margin: auto;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ================================
+   Jobsheet Summary Cards
+================================ */
+.summary-card {
+    background: white;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 0 0 4px #8b0000;
+    text-align: center;
+}
+
+.summary-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #444;
+}
+
+.summary-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #a60000;
+}
+
+.summary-sub {
+    font-size: 12px;
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* ================================
+   Connection & Loaded Popups
+================================ */
+.connection-badge,
+.loaded-badge {
+    position: fixed;
+    top: 18px;
+    right: 20px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 9999;
+    font-weight: 600;
+    display: flex;
+    gap: 10px;
+}
+
+.connection-badge .dot {
+    width: 10px;
+    height: 10px;
+    background: #a60000;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0.2; }
+}
+
+.loaded-badge {
+    border-left: 6px solid #2ecc71;
+}
+
+.loaded-badge .check {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+/* ================================
+   Modal: TK Number Detail
+================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 520px;
+    max-height: 75vh;
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    overflow-y: auto;
+    box-shadow: 0 0 0 5px #a60000;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 14px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.modal-item {
+    background: #f0f2f7;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid #0043ce;
+    font-weight: 600;
+}
+
+/* Scrollbar */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-body::-webkit-scrollbar-thumb {
+    background: #a60000;
+    border-radius: 10px;
+}
+
+/* ================================
+   LARGE CHART SECTION
 ================================ */
 .chart-section {
     width: 100%;
@@ -41,3 +337,6 @@
     border: 2px solid #a60000;
 }
 
+/* ================================
+   END OF FILE
+================================ */
