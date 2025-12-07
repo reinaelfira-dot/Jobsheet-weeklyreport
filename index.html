@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,8 +17,8 @@
 
 <!-- Custom CSS -->
 <link rel="stylesheet" href="style.css">
-
 </head>
+
 
 <body class="bg-[#8A0000] font-inter overflow-x-hidden">
 
@@ -30,7 +31,8 @@
         Real-time Asset & Jobsheet Monitoring System
     </p>
 </section>
-    <!-- GLOBAL CONNECTION STATUS -->
+
+<!-- GLOBAL CONNECTION STATUS -->
 <div id="connectionStatus" class="connection-badge hidden">
     <span class="dot"></span> Connecting...
 </div>
@@ -55,7 +57,6 @@
 
     <!-- FILTER ASSET -->
     <div class="canva-card mt-6">
-
         <h3 class="text-xl font-bold flex items-center gap-2 mb-3">🔍 Filter Asset Data</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -81,7 +82,6 @@
                 <span id="lastAssetUpdate">-</span>
             </div>
         </div>
-
     </div>
 
     <!-- STATUS UNIT + CUSTOMER -->
@@ -129,7 +129,8 @@
 
 </div>
 
-<!-- JOBSHEET OVERVIEW SECTION -->
+
+<!-- JOBSHEET OVERVIEW -->
 <div class="wrapper mt-10">
 
     <div class="canva-card">
@@ -139,9 +140,7 @@
         <p class="text-gray-600">Maintenance and repair job tracking system</p>
     </div>
 
-    <!-- JOBSHEET SUMMARY -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
-
         <div class="summary-card">
             <div class="summary-title">P1 PRIORITY</div>
             <div id="p1CountJS" class="summary-value">0</div>
@@ -165,50 +164,23 @@
             <div id="repairCountJS" class="summary-value">0</div>
             <div class="summary-sub">Total Repairs</div>
         </div>
-
     </div>
 
-    <!-- TOTAL COST -->
     <div class="canva-card mt-6">
         <h2 class="text-xl font-bold">💰 Total Cost Estimation</h2>
-        <p id="totalCostJS" class="text-3xl font-extrabold text-[#A60000] mt-2">
-            Rp 0
-        </p>
+        <p id="totalCostJS" class="text-3xl font-extrabold text-[#A60000] mt-2">Rp 0</p>
     </div>
 
 </div>
 
-<!-- CHART SECTION -->
-<div class="wrapper mt-10">
-    <div class="canva-card">
-        <div class="card-title mb-3">📊 Status Unit Distribution</div>
 
-        <select id="chartSelector" class="canva-input mb-4">
-            <option value="status">Status Unit</option>
-            <option value="customer">Customer</option>
-            <option value="location">Location</option>
-            <option value="vehicle">Vehicle Type</option>
-            <option value="year">Year</option>
-        </select>
+<!-- ===========================
+     NEW: ASSET CHART SECTION
+=========================== -->
+<section class="chart-section wrapper mt-10">
 
-        <canvas id="assetChart" height="140"></canvas>
-    </div>
-</div>
-
-<script src="script.js"></script>
-</body>
-</html>
-
-
-
-<!-- =============================
-     SECTION: ASSET CHARTS
-=============================== -->
-<section class="chart-section">
     <div class="chart-card">
-        <h2 class="chart-title">
-            <i class="fa-solid fa-chart-column"></i> ASSET CHARTS
-        </h2>
+        <h2 class="chart-title">📊 ASSET CHARTS</h2>
         <p class="chart-subtitle">Visual analysis of asset distribution</p>
     </div>
 
@@ -225,7 +197,24 @@
 
     <div class="chart-card">
         <h3 id="chartTitle" class="chart-subtitle">Year Distribution</h3>
-        <canvas id="assetChartLarge" height="110"></canvas>
+        <canvas id="assetChartLarge" height="130"></canvas>
     </div>
+
 </section>
 
+
+<!-- MODAL DETAIL -->
+<div id="detailModal" class="modal">
+  <div class="modal-content">
+      <button id="closeModal" class="modal-close">✕</button>
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody" class="modal-body"></div>
+  </div>
+</div>
+
+
+<!-- JS -->
+<script src="script.js"></script>
+
+</body>
+</html>
