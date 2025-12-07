@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PT Transkon Jaya – Fleet Management Dashboard</title>
 
-<!-- Tailwind CDN -->
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- Google Font -->
@@ -23,20 +23,15 @@
 
 <!-- HEADER -->
 <section class="w-full bg-[#A60000] text-white py-10 shadow-xl">
-    <h1 class="text-center text-4xl font-extrabold">
-        PT Transkon Jaya – Fleet Management Dashboard
-    </h1>
-    <p class="text-center text-lg mt-2 opacity-90">
-        Real-time Asset & Jobsheet Monitoring System
-    </p>
+    <h1 class="text-center text-4xl font-extrabold">PT Transkon Jaya – Fleet Management Dashboard</h1>
+    <p class="text-center text-lg mt-2 opacity-90">Real-time Asset & Jobsheet Monitoring System</p>
 </section>
 
-<!-- GLOBAL CONNECTION STATUS -->
+<!-- GLOBAL POPUPS -->
 <div id="connectionStatus" class="connection-badge hidden">
     <span class="dot"></span> Connecting...
 </div>
 
-<!-- GLOBAL LOADED SUMMARY -->
 <div id="loadedSummary" class="loaded-badge hidden">
     <span class="check">✔</span>
     <span id="loadedMessage">Data loaded.</span>
@@ -45,23 +40,22 @@
 <!-- WRAPPER -->
 <div class="wrapper">
 
-    <!-- ASSET OVERVIEW TITLE -->
+    <!-- ASSET OVERVIEW -->
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">
-            🚗 ASSET OVERVIEW
-        </div>
+        <div class="flex items-center gap-2 text-xl font-bold">🚗 ASSET OVERVIEW</div>
         <p class="text-gray-600">Fleet asset management and distribution statistics</p>
     </div>
 
-    <!-- FILTER ASSET SECTION -->
-    <section id="filterAssetSection" class="canva-card mt-6">
-        <h3 class="text-xl font-bold mb-3">🔍 Filter Asset Data</h3>
+    <!-- FILTER ASSET -->
+    <div class="canva-card mt-6">
+        <h3 class="text-xl font-bold flex items-center gap-2 mb-3">🔍 Filter Asset Data</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="canva-label">HUB LOCATION</label>
                 <select id="hubFilter" class="canva-input"></select>
             </div>
+
             <div>
                 <label class="canva-label">SITE LOCATION</label>
                 <select id="siteFilter" class="canva-input"></select>
@@ -73,25 +67,9 @@
             <button id="resetAssetFilter" class="canva-btn-outline">⭮ Reset</button>
 
             <div class="ml-auto text-sm text-gray-500 flex items-center gap-1">
-                📅 Last Update:
-                <span id="lastAssetUpdate">-</span>
+                📅 Last Update: <span id="lastAssetUpdate">-</span>
             </div>
         </div>
-    </section>
-
-    <!-- ASSET CHART (Chart A) — NOW BELOW FILTER -->
-    <div class="canva-card mt-6">
-        <div class="card-title mb-3">📊 Asset Chart</div>
-
-        <select id="chartSelector" class="canva-input mb-4">
-            <option value="status">Status Unit</option>
-            <option value="customer">Customer</option>
-            <option value="location">Location</option>
-            <option value="vehicle">Vehicle Type</option>
-            <option value="year">Year</option>
-        </select>
-
-        <canvas id="assetChart" height="180"></canvas>
     </div>
 
     <!-- STATUS + CUSTOMER -->
@@ -132,79 +110,95 @@
             <div id="vehicleList" class="scroll-body"></div>
         </div>
     </div>
-
 </div>
 
-<!-- JOBSHEET OVERVIEW SECTION -->
+<!-- ASSET CHART BELOW ASSET OVERVIEW (REQUESTED) -->
 <div class="wrapper mt-10">
-
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">
-            📑 JOBSHEET OVERVIEW
-        </div>
-        <p class="text-gray-600">Maintenance and repair job tracking system</p>
-    </div>
+        <div class="card-title mb-3">📊 ASSET DISTRIBUTION</div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
-        <div class="summary-card">
-            <div class="summary-title">P1 PRIORITY</div>
-            <div id="p1CountJS" class="summary-value">0</div>
-            <div class="summary-sub">High Priority</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-title">P2 PRIORITY</div>
-            <div id="p2CountJS" class="summary-value">0</div>
-            <div class="summary-sub">Medium Priority</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-title">CASH ON SITE</div>
-            <div id="cashCountJS" class="summary-value">0</div>
-            <div class="summary-sub">On-site Payment</div>
-        </div>
-
-        <div class="summary-card">
-            <div class="summary-title">REPAIR</div>
-            <div id="repairCountJS" class="summary-value">0</div>
-            <div class="summary-sub">Total Repairs</div>
-        </div>
-    </div>
-
-    <div class="canva-card mt-6">
-        <h2 class="text-xl font-bold">💰 Total Cost Estimation</h2>
-        <p id="totalCostJS" class="text-3xl font-extrabold text-[#A60000] mt-2">
-            Rp 0
-        </p>
-    </div>
-
-</div>
-
-<!-- LARGE CHART SECTION (Chart B) -->
-<section class="chart-section wrapper">
-    <div class="chart-card">
-        <h2 class="chart-title">📊 ASSET CHARTS (Detail)</h2>
-        <p class="chart-subtitle">Visual analysis of asset distribution</p>
-    </div>
-
-    <div class="chart-card">
-        <label class="chart-label">Select Chart Type</label>
-        <select id="assetChartSelector" class="chart-dropdown">
+        <select id="assetChartSelector" class="canva-input mb-4">
             <option value="year">Year</option>
             <option value="status">Status Unit</option>
             <option value="customer">Customer</option>
             <option value="location">Location</option>
             <option value="vehicle">Vehicle Type</option>
         </select>
-    </div>
 
-    <div class="chart-card">
-        <h3 id="chartTitle" class="chart-subtitle">Year Distribution</h3>
         <canvas id="assetChartLarge" height="140"></canvas>
     </div>
-</section>
+</div>
 
-<!-- MODAL DETAIL TK NUMBER -->
+<!-- JOBSHEET OVERVIEW -->
+<div class="wrapper mt-12">
+    <div class="canva-card">
+        <div class="flex items-center gap-2 text-xl font-bold">📑 JOBSHEET OVERVIEW</div>
+        <p class="text-gray-600">Maintenance and repair job tracking system</p>
+    </div>
+
+    <!-- DATE FILTER -->
+    <div class="canva-card mt-6">
+        <h3 class="text-lg font-bold mb-2">📅 Filter by Received Date</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="canva-label">Start Date</label>
+                <input type="date" id="jsStart" class="canva-input" />
+            </div>
+
+            <div>
+                <label class="canva-label">End Date</label>
+                <input type="date" id="jsEnd" class="canva-input" />
+            </div>
+        </div>
+
+        <div class="flex gap-3 mt-4">
+            <button id="applyJSFilter" class="canva-btn-primary">✓ Apply Filter</button>
+            <button id="resetJSFilter" class="canva-btn-outline">⭮ Reset</button>
+        </div>
+    </div>
+
+    <!-- JOBSHEET SUMMARY CARDS -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+        <div id="cardP1" class="summary-card clickable">
+            <div class="summary-title">P1 PRIORITY</div>
+            <div id="p1Count" class="summary-value">0</div>
+            <div class="summary-sub">High Priority</div>
+        </div>
+
+        <div id="cardP2" class="summary-card clickable">
+            <div class="summary-title">P2 PRIORITY</div>
+            <div id="p2Count" class="summary-value">0</div>
+            <div class="summary-sub">Medium Priority</div>
+        </div>
+
+        <div id="cardP3" class="summary-card clickable">
+            <div class="summary-title">P3 CASE</div>
+            <div id="p3Count" class="summary-value">0</div>
+            <div class="summary-sub">Special Cases</div>
+        </div>
+
+        <div id="cardCash" class="summary-card clickable">
+            <div class="summary-title">CASH ON SITE</div>
+            <div id="cashCount" class="summary-value">0</div>
+            <div class="summary-sub">On-site Payment</div>
+        </div>
+
+        <div id="cardRepair" class="summary-card clickable">
+            <div class="summary-title">REPAIR</div>
+            <div id="repairCount" class="summary-value">0</div>
+            <div class="summary-sub">Repairs Summary</div>
+        </div>
+    </div>
+
+    <!-- JOBSHEET CHART -->
+    <div class="canva-card mt-10">
+        <h3 class="card-title">📊 P3 Distribution by Site</h3>
+        <canvas id="p3PieChart" height="200"></canvas>
+    </div>
+</div>
+
+<!-- MODAL DETAIL -->
 <div id="detailModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -215,7 +209,7 @@
     </div>
 </div>
 
-<!-- JAVASCRIPT -->
+<!-- SCRIPTS -->
 <script src="script.js"></script>
 
 </body>
