@@ -14,8 +14,12 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- Chart.js DataLabels Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
 <!-- Custom CSS -->
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body class="bg-[#8A0000] font-inter overflow-x-hidden">
@@ -46,7 +50,9 @@
 
     <!-- ASSET OVERVIEW TITLE -->
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">🚗 ASSET OVERVIEW</div>
+        <div class="flex items-center gap-2 text-xl font-bold">
+            🚗 ASSET OVERVIEW
+        </div>
         <p class="text-gray-600">Fleet asset management and distribution statistics</p>
     </div>
 
@@ -59,6 +65,7 @@
                 <label class="canva-label">HUB LOCATION</label>
                 <select id="hubFilter" class="canva-input"></select>
             </div>
+
             <div>
                 <label class="canva-label">SITE LOCATION</label>
                 <select id="siteFilter" class="canva-input"></select>
@@ -114,14 +121,34 @@
             <div id="vehicleList" class="scroll-body"></div>
         </div>
     </div>
+</div>
 
+<!-- ========================================================= -->
+<!-- SMALL ASSET CHART (NOW ABOVE JOBSHEET) -->
+<!-- ========================================================= -->
+<div class="wrapper mt-10">
+    <div class="canva-card">
+        <div class="card-title mb-3">📊 Asset Chart</div>
+
+        <select id="chartSelector" class="canva-input mb-4">
+            <option value="status">Status Unit</option>
+            <option value="customer">Customer</option>
+            <option value="location">Location</option>
+            <option value="vehicle">Vehicle Type</option>
+            <option value="year">Year</option>
+        </select>
+
+        <canvas id="assetChart" height="150"></canvas>
+    </div>
 </div>
 
 <!-- JOBSHEET SECTION -->
 <div class="wrapper mt-10">
 
     <div class="canva-card">
-        <div class="flex items-center gap-2 text-xl font-bold">📑 JOBSHEET OVERVIEW</div>
+        <div class="flex items-center gap-2 text-xl font-bold">
+            📑 JOBSHEET OVERVIEW
+        </div>
         <p class="text-gray-600">Maintenance and repair job tracking system</p>
     </div>
 
@@ -157,25 +184,8 @@
     </div>
 </div>
 
-<!-- SMALL CHART -->
-<div class="wrapper mt-10">
-    <div class="canva-card">
-        <div class="card-title mb-3">📊 Asset Chart</div>
-
-        <select id="chartSelector" class="canva-input mb-4">
-            <option value="status">Status Unit</option>
-            <option value="customer">Customer</option>
-            <option value="location">Location</option>
-            <option value="vehicle">Vehicle Type</option>
-            <option value="year">Year</option>
-        </select>
-
-        <canvas id="assetChart" height="150"></canvas>
-    </div>
-</div>
-
-<!-- LARGE CHART -->
-<div class="wrapper mt-10 chart-section">
+<!-- LARGE CHART SECTION -->
+<section class="chart-section wrapper">
     <div class="chart-card">
         <h2 class="chart-title">📊 ASSET CHARTS</h2>
         <p class="chart-subtitle">Visual analysis of asset distribution</p>
@@ -196,9 +206,9 @@
         <h3 id="chartTitle" class="chart-subtitle">Year Distribution</h3>
         <canvas id="assetChartLarge" height="120"></canvas>
     </div>
-</div>
+</section>
 
-<!-- MODAL -->
+<!-- MODAL DETAIL TK -->
 <div id="detailModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -209,7 +219,7 @@
     </div>
 </div>
 
-<!-- SCRIPT -->
+<!-- JAVASCRIPT -->
 <script src="script.js"></script>
 
 </body>
