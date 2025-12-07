@@ -285,7 +285,6 @@ ul, li {
     font-weight: 600;
 }
 
-/* Scrollbar */
 .modal-body::-webkit-scrollbar {
     width: 6px;
 }
@@ -314,7 +313,6 @@ ul, li {
     font-size: 24px;
     font-weight: 700;
     color: #222;
-    margin-bottom: 4px;
 }
 
 .chart-subtitle {
@@ -326,7 +324,6 @@ ul, li {
 .chart-label {
     font-size: 14px;
     font-weight: 600;
-    display: block;
     margin-bottom: 8px;
 }
 
@@ -336,7 +333,3 @@ ul, li {
     border-radius: 10px;
     border: 2px solid #a60000;
 }
-
-/* ================================
-   END OF FILE
-================================ */
