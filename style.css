@@ -265,3 +265,57 @@ body {
 #assetChart {
     margin-top: 15px;
 }
+/* ===== FIX BULLET DOTS (HILANGKAN TITIK •) ===== */
+.list-item {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    background: #f7f7f7;
+    padding: 14px 20px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+
+    /* Hapus bullet */
+    list-style: none !important;
+}
+
+/* Pastikan parent list juga tidak menampilkan bullet */
+#statusUnitList,
+#customerList,
+#locationList,
+#yearList,
+#vehicleList {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* Badge */
+.item-badge {
+    background: #a60000;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Card wrapper rapi seperti Canva */
+.scroll-body {
+    max-height: 330px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Scrollbar rapi */
+.scroll-body::-webkit-scrollbar {
+    width: 6px;
+}
+.scroll-body::-webkit-scrollbar-thumb {
+    background: #b30000;
+    border-radius: 4px;
+}
+.scroll-body::-webkit-scrollbar-track {
+    background: transparent;
+}
