@@ -1,17 +1,18 @@
-/* -----------------------------------------------------------
+/* ============================================================
       API URL
-------------------------------------------------------------*/
+============================================================ */
 const API_URL =
   "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec";
 
 let assetData = [];
 let jobsheetData = [];
-let assetChart = null;
-let assetChartLarge = null;
 
-/* -----------------------------------------------------------
+/* Global Chart Object */
+let assetChart = null;
+
+/* ============================================================
       FORMATTER
-------------------------------------------------------------*/
+============================================================ */
 function formatNumber(num) {
   return Number(num || 0).toLocaleString("id-ID");
 }
@@ -20,9 +21,9 @@ function nowLabel() {
   return new Date().toLocaleString("id-ID");
 }
 
-/* -----------------------------------------------------------
-      LOADER UI
-------------------------------------------------------------*/
+/* ============================================================
+      LOADING UI
+============================================================ */
 function showConnection(status = "connecting") {
   const box = document.getElementById("connectionStatus");
 
@@ -40,17 +41,11 @@ function showLoadedSummary(text) {
   document.getElementById("loadedMessage").innerText = text;
 
   box.classList.remove("hidden");
-  setTimeout(() => box.classList.add("hidden"), 5000);
+  setTimeout(() => box.classList.add("hidden"), 3500);
 }
 
 function showCardLoading() {
-  const ids = [
-    "statusUnitList",
-    "customerList",
-    "locationList",
-    "yearList",
-    "vehicleList"
-  ];
+  const ids = ["statusUnitList", "customerList", "locationList", "yearList", "vehicleList"];
 
   ids.forEach((id) => {
     document.getElementById(id).innerHTML = `
@@ -61,9 +56,9 @@ function showCardLoading() {
   });
 }
 
-/* -----------------------------------------------------------
-      LOAD DATA ON START
-------------------------------------------------------------*/
+/* ============================================================
+      LOAD DATA
+============================================================ */
 document.addEventListener("DOMContentLoaded", loadData);
 
 async function loadData() {
@@ -84,25 +79,21 @@ async function loadData() {
     populateHubFilter();
     renderAssetCards(assetData);
     renderJobsheetSummary();
-    renderAssetChart("status", assetData);
-    renderLargeAssetChart("year", assetData);
+    renderAssetChart("year", assetData); // default chart
 
     showConnection("hide");
-    showLoadedSummary(
-      `Data loaded: ${assetData.length} assets, ${jobsheetData.length} jobsheets`
-    );
+    showLoadedSummary(`Data loaded: ${assetData.length} assets, ${jobsheetData.length} jobsheets`);
   } catch (err) {
     console.error("LOAD ERROR:", err);
     showLoadedSummary("❌ Failed to load data");
   }
 }
 
-/* -----------------------------------------------------------
+/* ============================================================
       HUB → SITE FILTER
-------------------------------------------------------------*/
+============================================================ */
 function populateHubFilter() {
   const hubs = [...new Set(assetData.map((a) => a["HUB"] || "Unknown"))].sort();
-
   document.getElementById("hubFilter").innerHTML =
     `<option value="ALL">All HUBs</option>` +
     hubs.map((h) => `<option value="${h}">${h}</option>`).join("");
@@ -111,10 +102,7 @@ function populateHubFilter() {
 }
 
 function populateSiteFilter(selectedHub) {
-  let filtered =
-    selectedHub === "ALL"
-      ? assetData
-      : assetData.filter((a) => a["HUB"] === selectedHub);
+  let filtered = selectedHub === "ALL" ? assetData : assetData.filter((a) => a["HUB"] === selectedHub);
 
   const sites = [...new Set(filtered.map((a) => a["Alt Location"] || "Unknown"))].sort();
 
@@ -127,36 +115,31 @@ document.getElementById("hubFilter").addEventListener("change", (e) => {
   populateSiteFilter(e.target.value);
 });
 
-/* -----------------------------------------------------------
-      FILTER BUTTONS
-------------------------------------------------------------*/
+/* Apply Filter */
 document.getElementById("applyAssetFilter").addEventListener("click", () => {
   const hub = document.getElementById("hubFilter").value;
   const site = document.getElementById("siteFilter").value;
 
   let filtered = assetData;
-
   if (hub !== "ALL") filtered = filtered.filter((r) => r["HUB"] === hub);
-  if (site !== "ALL")
-    filtered = filtered.filter((r) => r["Alt Location"] === site);
+  if (site !== "ALL") filtered = filtered.filter((r) => r["Alt Location"] === site);
 
   renderAssetCards(filtered);
-  renderAssetChart("status", filtered);
-  renderLargeAssetChart("year", filtered);
+  renderAssetChart(document.getElementById("chartSelector").value, filtered);
 });
 
+/* Reset Filter */
 document.getElementById("resetAssetFilter").addEventListener("click", () => {
   document.getElementById("hubFilter").value = "ALL";
   populateSiteFilter("ALL");
 
   renderAssetCards(assetData);
-  renderAssetChart("status", assetData);
-  renderLargeAssetChart("year", assetData);
+  renderAssetChart(document.getElementById("chartSelector").value, assetData);
 });
 
-/* -----------------------------------------------------------
-      TK MODAL
-------------------------------------------------------------*/
+/* ============================================================
+      RENDER LIST GROUP CARDS
+============================================================ */
 function getTK(row) {
   return row["TK No."] || row["TK No"] || row["TK"] || "";
 }
@@ -165,8 +148,7 @@ function openDetailModal(title, tkList) {
   const modal = document.getElementById("detailModal");
   document.getElementById("modalTitle").innerText = title;
 
-  const body = document.getElementById("modalBody");
-  body.innerHTML = tkList
+  document.getElementById("modalBody").innerHTML = tkList
     .map((t) => `<div class="modal-item">${t}</div>`)
     .join("");
 
@@ -177,9 +159,6 @@ document.getElementById("closeModal").addEventListener("click", () => {
   document.getElementById("detailModal").classList.remove("show");
 });
 
-/* -----------------------------------------------------------
-      RENDER GROUP LIST CARDS
-------------------------------------------------------------*/
 function renderGroup(listId, totalId, key, labelTitle, dataset) {
   const groupMap = {};
 
@@ -192,15 +171,13 @@ function renderGroup(listId, totalId, key, labelTitle, dataset) {
 
   const sorted = Object.entries(groupMap).sort((a, b) => b[1].count - a[1].count);
 
-  document.getElementById(totalId).innerText =
-    formatNumber(dataset.length) + " Units";
+  document.getElementById(totalId).innerText = formatNumber(dataset.length) + " Units";
 
   document.getElementById(listId).innerHTML = sorted
     .map(
       ([name, obj]) => `
-      <div class="list-item" onclick='openDetailModal("${labelTitle}: ${name}", ${JSON.stringify(
-        obj.tk
-      )})'>
+      <div class="list-item clickable"
+           onclick='openDetailModal("${labelTitle}: ${name}", ${JSON.stringify(obj.tk)})'>
           <span>${name}</span>
           <span class="item-badge">${formatNumber(obj.count)}</span>
       </div>`
@@ -216,160 +193,73 @@ function renderAssetCards(dataset) {
   renderGroup("vehicleList", "vehicleTotal", "Vehicle Type", "Vehicle Type", dataset);
 }
 
-/* -----------------------------------------------------------
+/* ============================================================
       JOBSHEET SUMMARY
-------------------------------------------------------------*/
+============================================================ */
 function renderJobsheetSummary() {
   function countContains(col, str) {
     return jobsheetData.filter((x) => x[col]?.toLowerCase().includes(str)).length;
   }
 
-  document.getElementById("p1CountJS").innerText =
-    countContains("Category (P1,P2,P3/Ready Stock)", "p1");
-
-  document.getElementById("p2CountJS").innerText =
-    countContains("Category (P1,P2,P3/Ready Stock)", "p2");
-
-  document.getElementById("cashCountJS").innerText =
-    countContains("Memo", "cash");
-
-  document.getElementById("repairCountJS").innerText =
-    countContains("VCR", "repair");
+  document.getElementById("p1CountJS").innerText = countContains("Category (P1,P2,P3/Ready Stock)", "p1");
+  document.getElementById("p2CountJS").innerText = countContains("Category (P1,P2,P3/Ready Stock)", "p2");
+  document.getElementById("cashCountJS").innerText = countContains("Memo", "cash");
+  document.getElementById("repairCountJS").innerText = countContains("VCR", "repair");
 
   const totalCost = jobsheetData.reduce(
-    (sum, x) =>
-      sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0),
+    (sum, x) => sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0),
     0
   );
 
-  document.getElementById("totalCostJS").innerText =
-    "Rp " + formatNumber(totalCost);
+  document.getElementById("totalCostJS").innerText = "Rp " + formatNumber(totalCost);
 }
 
-/* -----------------------------------------------------------
-      SMALL CHART – WITH PERCENTAGE LABELS
-------------------------------------------------------------*/
-function renderAssetChart(type, dataset = assetData) {
-  const keyMap = {
-    status: "Status Unit 3",
-    customer: "Customer",
-    location: "Alt Location",
-    vehicle: "Vehicle Type",
-    year: "Year",
-  };
-
-  const key = keyMap[type];
-
-  const map = {};
-  dataset.forEach((r) => {
-    const v = r[key] || "Unknown";
-    map[v] = (map[v] || 0) + 1;
-  });
-
-  const labels = Object.keys(map);
-  const values = Object.values(map);
-  const total = values.reduce((x, y) => x + y, 0);
-
-  const ctx = document.getElementById("assetChart").getContext("2d");
-  if (assetChart) assetChart.destroy();
-
-  assetChart = new Chart(ctx, {
-    type: "bar",
-    plugins: [ChartDataLabels],
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Units",
-          data: values,
-          backgroundColor: "#A60000",
-          borderRadius: 10,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        datalabels: {
-          color: "#000",
-          anchor: "end",
-          align: "top",
-          formatter: (val) => ((val / total) * 100).toFixed(1) + "%",
-        },
-      },
-      scales: {
-        y: { beginAtZero: true },
-      },
-    },
-  });
-}
-
+/* ============================================================
+      BEAUTIFUL CARD-STYLE BAR CHART (VERSION B)
+============================================================ */
 document.getElementById("chartSelector").addEventListener("change", (e) => {
   renderAssetChart(e.target.value, assetData);
 });
 
-/* -----------------------------------------------------------
-      LARGE CHART – WITH PERCENTAGE LABELS
-------------------------------------------------------------*/
-document.getElementById("assetChartSelector").addEventListener("change", (e) => {
-  renderLargeAssetChart(e.target.value, assetData);
-});
-
-function renderLargeAssetChart(type = "year", dataset = assetData) {
-  const keyMap = {
+function renderAssetChart(type = "year", dataset = assetData) {
+  const keys = {
     year: "Year",
     status: "Status Unit 3",
     customer: "Customer",
     location: "Alt Location",
-    vehicle: "Vehicle Type",
+    vehicle: "Vehicle Type"
   };
 
-  const key = keyMap[type];
+  const key = keys[type];
 
+  /* Grouping */
   const map = {};
   dataset.forEach((r) => {
     const v = r[key] || "Unknown";
+    if (v === "Unknown") return; // ⛔ Remove "Unknown"
     map[v] = (map[v] || 0) + 1;
   });
 
   const labels = Object.keys(map);
   const values = Object.values(map);
-  const total = values.reduce((x, y) => x + y, 0);
+  const total = values.reduce((a, b) => a + b, 0);
 
-  const ctx = document.getElementById("assetChartLarge").getContext("2d");
-  if (assetChartLarge) assetChartLarge.destroy();
+  /* Render HTML Card Chart (NO Chart.js) */
+  const container = document.getElementById("assetChartCard");
+  container.innerHTML = "";
 
-  assetChartLarge = new Chart(ctx, {
-    type: "bar",
-    plugins: [ChartDataLabels],
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Units",
-          data: values,
-          backgroundColor: "#b30000",
-          borderRadius: 12,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: { display: false },
-        datalabels: {
-          color: "#000",
-          anchor: "end",
-          align: "top",
-          formatter: (val) => ((val / total) * 100).toFixed(1) + "%",
-        },
-      },
-      scales: {
-        y: { beginAtZero: true },
-      },
-    },
+  labels.forEach((label, i) => {
+    const count = values[i];
+    const pct = ((count / total) * 100).toFixed(1);
+
+    container.innerHTML += `
+      <div class="chart-box">
+          <div class="chart-title-top">${label}</div>
+          <div class="chart-bar">
+              <div class="chart-value">${formatNumber(count)}</div>
+              <div class="chart-percent">${pct}%</div>
+          </div>
+      </div>
+    `;
   });
-
-  document.getElementById("chartTitle").innerText =
-    type.charAt(0).toUpperCase() + type.slice(1) + " Distribution";
 }
