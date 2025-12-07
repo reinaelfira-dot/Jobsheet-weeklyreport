@@ -1,396 +1,267 @@
-/* GLOBAL SETTINGS */
+/* ==========================================================
+   GLOBAL STYLE
+========================================================== */
+
 body {
-    font-family: "Inter", sans-serif;
+    font-family: 'Inter', sans-serif;
+    background-color: #8A0000;
+    margin: 0;
+    padding: 0;
 }
 
-/* WRAPPER – Semua konten diberi margin kiri kanan */
 .wrapper {
-    width: 95%;
-    margin-left: auto;
-    margin-right: auto;
+    width: 92%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 0 60px 0;
 }
 
-/* CARD UTAMA / CANVA CARD */
+/* ==========================================================
+   CARD BASE STYLE
+========================================================== */
+
 .canva-card {
     background: #ffffff;
-    border-radius: 20px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-    position: relative;
+    border-radius: 22px;
+    padding: 26px;
+    margin-bottom: 25px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    overflow: hidden; /* Prevent scroll overflow */
 }
 
-/* TITLE DI DALAM CARD */
 .card-title {
     font-size: 20px;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 8px;
 }
 
-/* BADGE "Units" */
-.unit-badge {
-    position: absolute;
-    top: 22px;
-    right: 22px;
-    background: #A60000;
-    color: white;
+/* ==========================================================
+   FILTER INPUT FIELDS
+========================================================== */
+
+.canva-label {
     font-size: 13px;
-    padding: 5px 12px;
-    border-radius: 20px;
     font-weight: 600;
+    color: #333;
 }
 
-
-/* SCROLLABLE CARD CONTENT */
-/* -----------------------------------------
-   FIX: Scrollbar Tidak Keluar Dari Card
-------------------------------------------*/
-
-.scroll-card {
-    position: relative;
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 0; /* padding dihapus supaya scroll-body tidak overflow */
-    overflow: hidden; /* penting! mencegah scrollbar keluar frame */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-
-.scroll-body {
-    max-height: 260px; /* tinggi area konten scroll */
-    overflow-y: auto;
-    padding: 14px 22px; /* padding dalam */
-    box-sizing: border-box;
-}
-
-/* Scrollbar styling */
-.scroll-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scroll-body::-webkit-scrollbar-track {
-    background: transparent;
-    margin-top: 14px;      /* agar scrollbar tidak menyentuh ujung card */
-    margin-bottom: 14px;
-}
-
-.scroll-body::-webkit-scrollbar-thumb {
-    background: #A60000;
-    border-radius: 8px;
-}
-
-/* List-item agar spacing simetris */
-.list-item {
-    background: #f8f8f8;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    border-radius: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.list-item:hover {
-    background: #ffe5e5;
-    transform: translateX(4px);
-}
-
-/* Bubble merah angka */
-.item-badge {
-    background: #A60000;
-    padding: 6px 14px;
-    border-radius: 20px;
-    color: white;
-    font-weight: 700;
-    min-width: 45px;
-    text-align: center;
-}
-
-
-
-/* BUTTONS */
-.canva-btn-primary {
-    background: #A60000;
-    color: white;
-    padding: 12px 24px;
-    font-weight: 700;
-    font-size: 16px;
-    border-radius: 12px;
-    transition: 0.2s;
-}
-
-.canva-btn-primary:hover {
-    background: #8A0000;
-    transform: translateY(-1px);
-}
-
-.canva-btn-outline {
-    border: 2px solid #A60000;
-    padding: 12px 24px;
-    color: #A60000;
-    font-weight: 700;
-    font-size: 16px;
-    border-radius: 12px;
-    transition: 0.2s;
-}
-
-.canva-btn-outline:hover {
-    background: #ffe5e5;
-}
-
-
-
-/* INPUT CANVA (DROPDOWN/DATE INPUT) */
 .canva-input {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e5e5e5;
-    border-radius: 12px;
-    background: #ffffff;
-    font-size: 15px;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.canva-input:hover {
-    border-color: #A60000;
+    padding: 12px 14px;
+    border: 2px solid #ddd;
+    border-radius: 14px;
+    font-size: 14px;
+    margin-top: 4px;
+    outline: none;
 }
 
 .canva-input:focus {
-    outline: none;
-    border-color: #A60000;
-    box-shadow: 0px 0px 4px rgba(166,0,0,0.4);
+    border-color: #a60000;
 }
 
-/* LABEL CANVA */
-.canva-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    color: #555;
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-}
+/* BUTTONS */
 
-
-/* SUMMARY CARD (Jobsheet Overview) */
-.summary-card {
-    padding: 25px;
-    border-radius: 20px;
-    background: linear-gradient(145deg, #ff4d4d, #A60000);
+.canva-btn-primary {
+    background: #a60000;
     color: white;
-    text-align: center;
-    box-shadow: 0px 6px 14px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: 0.2s;
+    padding: 11px 22px;
+    font-weight: 600;
+    border-radius: 12px;
 }
 
-.summary-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0px 10px 20px rgba(0,0,0,0.25);
+.canva-btn-outline {
+    background: transparent;
+    border: 2px solid #a60000;
+    color: #a60000;
+    padding: 10px 22px;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+/* ==========================================================
+   TOP RIGHT BADGE (TOTAL)
+========================================================== */
+
+.unit-badge {
+    background: #a60000;
+    color: #fff;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    float: right;
+}
+
+/* ==========================================================
+   LIST CARD SCROLL AREA
+========================================================== */
+
+.scroll-card {
+    position: relative;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Custom Scrollbar */
+.scroll-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scroll-card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-card::-webkit-scrollbar-thumb {
+    background: #b30000;
+    border-radius: 10px;
+}
+
+/* ==========================================================
+   LIST ITEM STYLE
+========================================================== */
+
+.list-item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: #f7f7f7;
+    padding: 14px 18px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+
+    font-size: 16px;
+    color: #222;
+
+    list-style: none; /* Remove bullet */
+}
+
+/* Name (left side) */
+.list-item span:first-child {
+    font-weight: 500;
+}
+
+/* Number badge */
+.item-badge {
+    background: #a60000;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    min-width: 48px;
+    text-align: center;
+}
+
+/* ==========================================================
+   LOADING UI
+========================================================== */
+
+.card-loading {
+    width: 100%;
+    text-align: center;
+    padding: 20px 0 30px 0;
+}
+
+.loader {
+    width: 36px;
+    height: 36px;
+    border: 4px solid #ddd;
+    border-top-color: #a60000;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.card-loading p {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* ==========================================================
+   CONNECTION STATUS BADGE
+========================================================== */
+
+#connectionStatus {
+    background: #ffe5e5;
+    padding: 8px 16px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #a60000;
+    margin: 12px 0;
+}
+
+#connectionStatus.hidden {
+    display: none;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: #a60000;
+    border-radius: 50%;
+}
+
+/* Loaded Summary */
+#loadedSummary {
+    background: #eaffea;
+    border-left: 4px solid #2ac200;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+#loadedSummary.hidden {
+    display: none;
+}
+
+/* ==========================================================
+   SUMMARY CARDS (JOBSHEET)
+========================================================== */
+
+.summary-card {
+    background: linear-gradient(to bottom, #ffbaba, #a60000);
+    color: white;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
 }
 
 .summary-title {
+    font-size: 16px;
     font-weight: 700;
-    font-size: 17px;
+    margin-bottom: 10px;
 }
 
 .summary-value {
-    font-size: 45px;
-    font-weight: 900;
-    margin: 8px 0;
+    font-size: 34px;
+    font-weight: 800;
 }
 
 .summary-sub {
     font-size: 13px;
-    opacity: 0.9;
-    font-weight: 500;
+    opacity: 0.85;
+    margin-top: 6px;
 }
 
+/* ==========================================================
+   CHART
+========================================================== */
 
-
-/* LOADING SPINNER – Canva Style */
-.spinner {
-    width: 42px;
-    height: 42px;
-    border: 4px solid #e6e6e6;
-    border-top-color: #A60000;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 20px auto;
+#assetChart {
+    margin-top: 15px;
 }
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-
-
-/* CHART CARD */
-.chart-card {
-    background: #ffffff;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-    margin-bottom: 30px;
-}
-
-.chart-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-/* ===============================
-   CONNECTION BADGES (CANVA STYLE)
-   =============================== */
-
-.connection-badge {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #ffe5e5;
-    padding: 7px 18px;
-    border-radius: 20px;
-    font-size: 14px;
-    color: #c70000;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 9999;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-}
-
-.connection-badge .dot {
-    width: 8px;
-    height: 8px;
-    background: #ff4b4b;
-    border-radius: 50%;
-}
-
-.loaded-badge {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: #e6ffee;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    color: #006b2e;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 9999;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.18);
-}
-
-.loaded-badge .check {
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* CARD LOADING SPINNER */
-.card-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 32px 0;
-    opacity: 0.8;
-}
-
-.card-loading .loader {
-    width: 34px;
-    height: 34px;
-    border: 4px solid #ddd;
-    border-top-color: #b80000;
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-}
-
-.card-loading p {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #777;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ---------------------------------------
-   GLOBAL CONNECTION STATUS BADGE
---------------------------------------- */
-.connection-box {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #ffe5e5;
-    color: #b30000;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    z-index: 9999;
-}
-
-.connection-box .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: red;
-}
-
-/* Hide */
-.hidden {
-    display: none !important;
-}
-
-/* ---------------------------------------
-   SUCCESS SUMMARY BADGE
---------------------------------------- */
-.loaded-box {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #e7fff3;
-    color: #007f3b;
-    padding: 12px 20px;
-    border-radius: 14px;
-    font-weight: 600;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
-    z-index: 9999;
-}
-
-/* ---------------------------------------
-   LOADING SPINNER (CANVA STYLE)
---------------------------------------- */
-.loader {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #eee;
-    border-top-color: #b00000;
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-    margin: auto;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.card-loading {
-    text-align: center;
-    padding: 30px 0;
-    color: #777;
-}
-
