@@ -1,390 +1,410 @@
-/*************************************************
- * CONFIG
- *************************************************/
-const API = {
-    asset: "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec?action=asset",
-    jobsheet: "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec?action=jobsheet",
-    p2: "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec?action=p2",
-    p3: "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec?action=p3"
-};
+/* ----------------------------------------------------------
+   GOOGLE APPS SCRIPT ENDPOINT
+---------------------------------------------------------- */
+const API_BASE = "https://script.google.com/macros/s/AKfycbzW_QKhsFWAEZS0AP8P-HnU0ZOz9_p--h9Y2w_lt0PeWg1i4yGQTlE6svCypSgZ8QgY/exec";
 
+/* ----------------------------------------------------------
+   GLOBAL VARIABLES
+---------------------------------------------------------- */
 let assetData = [];
 let jobsheetData = [];
 let p2Data = [];
 let p3Data = [];
 
-let assetChart = null;
-let p3PieChart = null;
+let p3Chart = null;
 
-/*************************************************
- * LOAD DATA
- *************************************************/
-document.addEventListener("DOMContentLoaded", async () => {
-    showConnection("connecting");
-    showCardLoading();
-
-    try {
-        const assetRes = await fetch(API.asset);
-        const jsRes = await fetch(API.jobsheet);
-        const p2Res = await fetch(API.p2);
-        const p3Res = await fetch(API.p3);
-
-        assetData = (await assetRes.json()).data || [];
-        jobsheetData = (await jsRes.json()).data || [];
-        p2Data = (await p2Res.json()).data || [];
-        p3Data = (await p3Res.json()).data || [];
-
-        document.getElementById("lastAssetUpdate").innerText = nowLabel();
-
-        initAssetOverview();
-        initJobsheetOverview();
-
-        showConnection("hide");
-        showLoadedSummary("Data Loaded Successfully");
-    } catch (err) {
-        console.error(err);
-        showLoadedSummary("❌ Failed to load data");
-    }
-});
-
-/*************************************************
- * FORMATTER
- *************************************************/
-function nowLabel() {
-    return new Date().toLocaleString("id-ID");
+/* ----------------------------------------------------------
+   SHOW / HIDE STATUS BADGES
+---------------------------------------------------------- */
+function showConnecting() {
+    document.getElementById("connectionStatus").classList.remove("hidden");
 }
 
-function formatNumber(n) {
-    return Number(n || 0).toLocaleString("id-ID");
+function hideConnecting() {
+    document.getElementById("connectionStatus").classList.add("hidden");
 }
 
-/*************************************************
- * LOADING UI
- *************************************************/
-function showConnection(status) {
-    const el = document.getElementById("connectionStatus");
-    if (status === "connecting") el.classList.remove("hidden");
-    else el.classList.add("hidden");
-}
-
-function showLoadedSummary(msg) {
+function showLoaded(msg = "Data Loaded") {
     const el = document.getElementById("loadedSummary");
     document.getElementById("loadedMessage").innerText = msg;
     el.classList.remove("hidden");
-    setTimeout(() => el.classList.add("hidden"), 4000);
+    setTimeout(() => el.classList.add("hidden"), 2000);
 }
 
-function showCardLoading() {
-    ["statusUnitList", "customerList", "locationList", "yearList", "vehicleList"].forEach(id => {
-        document.getElementById(id).innerHTML =
-            `<div class="card-loading">
-                <div class="loader"></div>
-                <p>Loading...</p>
-            </div>`;
-    });
-}
-
-/*************************************************
- * ASSET OVERVIEW
- *************************************************/
-function initAssetOverview() {
-    populateHubFilter();
-    renderAssetCards(assetData);
-    renderAssetChart("status");
-}
-
-function populateHubFilter() {
-    const hubs = [...new Set(assetData.map(r => r["HUB"]).filter(Boolean))].sort();
-    const html = `<option value="ALL">All HUB</option>` +
-                 hubs.map(h => `<option value="${h}">${h}</option>`).join("");
-
-    document.getElementById("hubFilter").innerHTML = html;
-    populateSiteFilter("ALL");
-}
-
-function populateSiteFilter(hub) {
-    const list = hub === "ALL" ? assetData : assetData.filter(r => r["HUB"] === hub);
-
-    const sites = [...new Set(list.map(r => r["Alt Location"]).filter(Boolean))].sort();
-
-    document.getElementById("siteFilter").innerHTML =
-        `<option value="ALL">All Site</option>` +
-        sites.map(s => `<option>${s}</option>`).join("");
-}
-
-document.getElementById("hubFilter").addEventListener("change", e => {
-    populateSiteFilter(e.target.value);
+/* ----------------------------------------------------------
+   INITIAL DATA LOAD
+---------------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", async () => {
+    showConnecting();
+    await loadAllData();
+    hideConnecting();
+    showLoaded("Dashboard Updated");
 });
 
+/* ----------------------------------------------------------
+   LOAD ALL DATA
+---------------------------------------------------------- */
+async function loadAllData() {
+    try {
+        await Promise.all([
+            loadAssetData(),
+            loadJobsheetData(),
+            loadP2(),
+            loadP3()
+        ]);
+
+        buildAssetFilters();
+        renderAssetOverview();
+        renderAssetChart("year");
+
+        renderJobsheetSummary(jobsheetData);
+        renderP3PieChart(p3Data);
+
+    } catch (err) {
+        console.error("LOAD ERROR:", err);
+    }
+}
+
+/* ----------------------------------------------------------
+   FETCH HELPERS
+---------------------------------------------------------- */
+async function fetchJSON(url) {
+    const res = await fetch(url);
+    return res.json();
+}
+
+/* ----------------------------------------------------------
+   LOAD ASSET DATA
+---------------------------------------------------------- */
+async function loadAssetData() {
+    const j = await fetchJSON(API_BASE + "?action=asset");
+    assetData = j.data || [];
+}
+
+/* ----------------------------------------------------------
+   LOAD JOBSHEET DATA
+---------------------------------------------------------- */
+async function loadJobsheetData() {
+    const j = await fetchJSON(API_BASE + "?action=jobsheet");
+    jobsheetData = j.data || [];
+}
+
+/* ----------------------------------------------------------
+   LOAD P2
+---------------------------------------------------------- */
+async function loadP2() {
+    const j = await fetchJSON(API_BASE + "?action=p2");
+    p2Data = j.data || [];
+}
+
+/* ----------------------------------------------------------
+   LOAD P3 (custom sheet)
+---------------------------------------------------------- */
+async function loadP3() {
+    const j = await fetchJSON(API_BASE + "?action=p3");
+    p3Data = j.data || [];
+}
+
+/* ----------------------------------------------------------
+   ASSET FILTER SETUP
+---------------------------------------------------------- */
+function buildAssetFilters() {
+    const hubs = [...new Set(assetData.map(a => a.HUB || ""))].sort();
+    const sites = [...new Set(assetData.map(a => a.SITE || ""))].sort();
+
+    fillSelect("hubFilter", hubs);
+    fillSelect("siteFilter", sites);
+}
+
+function fillSelect(id, arr) {
+    const el = document.getElementById(id);
+    el.innerHTML = `<option value="">All</option>`;
+    arr.forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
+}
+
+/* ----------------------------------------------------------
+   ASSET FILTER EVENT
+---------------------------------------------------------- */
 document.getElementById("applyAssetFilter").addEventListener("click", () => {
-    const hub = document.getElementById("hubFilter").value;
-    const site = document.getElementById("siteFilter").value;
-
-    let filtered = assetData;
-    if (hub !== "ALL") filtered = filtered.filter(r => r["HUB"] === hub);
-    if (site !== "ALL") filtered = filtered.filter(r => r["Alt Location"] === site);
-
-    renderAssetCards(filtered);
-    renderAssetChart("status", filtered);
+    renderAssetOverview();
+    renderAssetChart(document.getElementById("assetChartSelector").value);
 });
 
 document.getElementById("resetAssetFilter").addEventListener("click", () => {
-    document.getElementById("hubFilter").value = "ALL";
-    populateSiteFilter("ALL");
-    renderAssetCards(assetData);
-    renderAssetChart("status", assetData);
+    document.getElementById("hubFilter").value = "";
+    document.getElementById("siteFilter").value = "";
+    renderAssetOverview();
+    renderAssetChart("year");
 });
 
-/*************************************************
- * RENDER ASSET CARDS
- *************************************************/
-function getTK(row) {
-    return row["TK No."] || "";
+/* ----------------------------------------------------------
+   ASSET OVERVIEW
+---------------------------------------------------------- */
+function getFilteredAssets() {
+    let hub = document.getElementById("hubFilter").value;
+    let site = document.getElementById("siteFilter").value;
+
+    return assetData.filter(a =>
+        (hub === "" || a.HUB === hub) &&
+        (site === "" || a.SITE === site)
+    );
 }
 
-function renderGroup(listId, totalId, key, title, dataset) {
-    const map = {};
+function renderAssetOverview() {
+    let d = getFilteredAssets();
 
-    dataset.forEach(r => {
-        const v = r[key];
-        if (!v) return; // REMOVE UNKNOWN
-        if (!map[v]) map[v] = { count: 0, tk: [] };
-        map[v].count++;
-        map[v].tk.push(getTK(r));
+    countList("statusUnitList", "statusUnitTotal", d, "STATUS");
+    countList("customerList", "customerTotal", d, "CUSTOMER");
+    countList("locationList", "locationTotal", d, "SITE");
+    countList("yearList", "yearTotal", d, "YEAR");
+    countList("vehicleList", "vehicleTotal", d, "VEHICLE TYPE");
+}
+
+function countList(listId, totalId, data, key) {
+    const map = {};
+    data.forEach(a => {
+        const v = a[key] || "Unknown";
+        map[v] = (map[v] || 0) + 1;
     });
 
-    const sorted = Object.entries(map).sort((a,b)=>b[1].count - a[1].count);
+    document.getElementById(totalId).innerText = `${data.length} Units`;
 
-    document.getElementById(totalId).innerText = formatNumber(dataset.length) + " Units";
+    const box = document.getElementById(listId);
+    box.innerHTML = "";
 
-    document.getElementById(listId).innerHTML = sorted.map(([name,obj]) => `
-        <div class="list-item" onclick='openDetail("${title}: ${name}", ${JSON.stringify(obj.tk)})'>
-            <span>${name}</span>
-            <span class="item-badge">${obj.count}</span>
-        </div>
-    `).join("");
+    Object.entries(map).sort().forEach(([k, v]) => {
+        box.innerHTML += `
+            <div class="scroll-item">
+                <span>${k}</span>
+                <span class="unit-badge">${v}</span>
+            </div>
+        `;
+    });
 }
 
-function renderAssetCards(ds) {
-    renderGroup("statusUnitList", "statusUnitTotal", "Status Unit 3", "Status Unit", ds);
-    renderGroup("customerList", "customerTotal", "Customer", "Customer", ds);
-    renderGroup("locationList", "locationTotal", "Alt Location", "Location", ds);
-    renderGroup("yearList", "yearTotal", "Year", "Year", ds);
-    renderGroup("vehicleList", "vehicleTotal", "Vehicle Type", "Vehicle", ds);
-}
-
-function openDetail(title, dataList) {
-    const modal = document.getElementById("detailModal");
-    document.getElementById("modalTitle").innerText = title;
-
-    document.getElementById("modalBody").innerHTML =
-        dataList.map(d => `<div class="modal-item">${d}</div>`).join("");
-
-    modal.classList.add("show");
-}
-
-document.getElementById("closeModal").addEventListener("click", () => {
-    document.getElementById("detailModal").classList.remove("show");
+/* ----------------------------------------------------------
+   ASSET CHART LARGE
+---------------------------------------------------------- */
+document.getElementById("assetChartSelector").addEventListener("change", e => {
+    renderAssetChart(e.target.value);
 });
 
-/*************************************************
- * ASSET CHART (Bentuk Chart A)
- *************************************************/
-function renderAssetChart(type, dataset = assetData) {
-    const keyMap = {
-        status: "Status Unit 3",
-        customer: "Customer",
-        location: "Alt Location",
-        vehicle: "Vehicle Type",
-        year: "Year"
-    };
+function renderAssetChart(mode) {
+    const ctx = document.getElementById("assetChartLarge").getContext("2d");
 
-    const key = keyMap[type];
+    let data = getFilteredAssets();
+    let field = "";
+
+    if (mode === "year") field = "YEAR";
+    if (mode === "status") field = "STATUS";
+    if (mode === "customer") field = "CUSTOMER";
+    if (mode === "location") field = "SITE";
+    if (mode === "vehicle") field = "VEHICLE TYPE";
 
     const map = {};
-    dataset.forEach(r => {
-        const v = r[key];
-        if (!v) return;
+    data.forEach(a => {
+        const v = a[field] || "Unknown";
         map[v] = (map[v] || 0) + 1;
     });
 
     const labels = Object.keys(map);
     const values = Object.values(map);
-    const total = values.reduce((a,b)=>a+b,0);
 
-    const ctx = document.getElementById("assetChart").getContext("2d");
+    if (window.assetChart) window.assetChart.destroy();
 
-    if (assetChart) assetChart.destroy();
-
-    assetChart = new Chart(ctx, {
+    window.assetChart = new Chart(ctx, {
         type: "bar",
         data: {
             labels,
             datasets: [{
-                label: "Units",
+                label: "Total",
                 data: values,
-                backgroundColor: "#A60000",
-                borderRadius: 10
+                backgroundColor: "#A60000"
             }]
         },
         options: {
+            responsive: true,
             plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const v = ctx.raw;
-                            const pct = (v / total * 100).toFixed(1);
-                            return `${v} units (${pct}%)`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: { beginAtZero: true }
+                legend: { display: false }
             }
         }
     });
 }
 
-/*************************************************
- * JOBSHEET OVERVIEW WITH DATE FILTER
- *************************************************/
-function initJobsheetOverview() {
-    document.getElementById("applyDateFilter").addEventListener("click", applyDateFilter);
+/* ----------------------------------------------------------
+   JOBSHEET DATE FILTER
+---------------------------------------------------------- */
+document.getElementById("applyJSFilter").addEventListener("click", () => {
+    const start = document.getElementById("jsStart").value;
+    const end = document.getElementById("jsEnd").value;
 
-    applyDateFilter(); // initial
+    let filtered = jobsheetData.filter(j => {
+        if (!j["Received"]) return false;
+        if (start && j["Received"] < start) return false;
+        if (end && j["Received"] > end) return false;
+        return true;
+    });
+
+    renderJobsheetSummary(filtered);
+    renderP3PieChart(p3Data); // P3 tidak ikut filter
+});
+
+document.getElementById("resetJSFilter").addEventListener("click", () => {
+    document.getElementById("jsStart").value = "";
+    document.getElementById("jsEnd").value = "";
+    renderJobsheetSummary(jobsheetData);
+    renderP3PieChart(p3Data);
+});
+
+/* ----------------------------------------------------------
+   JOBSHEET SUMMARY CARDS
+---------------------------------------------------------- */
+function renderJobsheetSummary(list) {
+    const p1 = list.filter(j => j["Category (P1,P2,P3/Ready Stock)"].includes("P1"));
+    const p2 = p2Data; // Full sheet, not from jobsheet
+    const p3 = p3Data; // Full P3 sheet
+    const cash = list.filter(j => (j.Memo || "").toLowerCase().includes("cash"));
+    const repair = list.filter(j => (j.VCR || "").toLowerCase().includes("repair"));
+
+    document.getElementById("p1Count").innerText = p1.length;
+    document.getElementById("p2Count").innerText = p2.length;
+    document.getElementById("p3Count").innerText = p3.length;
+    document.getElementById("cashCount").innerText = cash.length;
+    document.getElementById("repairCount").innerText = repair.length;
 }
 
-function applyDateFilter() {
-    const start = document.getElementById("dateStart").value;
-    const end = document.getElementById("dateEnd").value;
+/* ----------------------------------------------------------
+   P3 PIE CHART (BY SITE)
+---------------------------------------------------------- */
+function renderP3PieChart(data) {
+    const ctx = document.getElementById("p3PieChart");
 
-    let filtered = jobsheetData;
-
-    if (start) filtered = filtered.filter(r => r["Received"] >= start);
-    if (end) filtered = filtered.filter(r => r["Received"] <= end);
-
-    renderJobsheetCards(filtered);
-    renderRepairDetails(filtered);
-    renderCashDetails(filtered);
-    renderP2Data();
-    renderP3Data();
-    renderP3PieChart();
-}
-
-/*************************************************
- * JOBSHEET CARDS (P1–P2–P3–Cash–Repair)
- *************************************************/
-function renderJobsheetCards(list) {
-    const countP1 = list.filter(r => r["Category (P1,P2,P3/Ready Stock)"].includes("P1")).length;
-    const countP2 = list.filter(r => r["Category (P1,P2,P3/Ready Stock)"].includes("P2")).length;
-    const countCash = list.filter(r => r["Memo"].toLowerCase().includes("cash")).length;
-    const countRepair = list.filter(r => r["VCR"].toLowerCase().includes("repair")).length;
-
-    document.getElementById("p1Count").innerText = countP1;
-    document.getElementById("p2Count").innerText = p2Data.length;
-    document.getElementById("p3Count").innerText = p3Data.length;
-    document.getElementById("cashCount").innerText = countCash;
-    document.getElementById("repairCount").innerText = countRepair;
-
-    document.getElementById("cardP1").onclick = () => openJobsheetModal("P1 Jobsheet", list.filter(r=>r["Category (P1,P2,P3/Ready Stock)"].includes("P1")));
-    document.getElementById("cardP2").onclick = () => openJobsheetModal("P2 Jobsheet", p2Data);
-    document.getElementById("cardP3").onclick = () => openP3Modal();
-    document.getElementById("cardCash").onclick = () => openCashModal(list);
-    document.getElementById("cardRepair").onclick = () => openRepairModal(list);
-}
-
-/*************************************************
- * MODAL RENDERING
- *************************************************/
-function openJobsheetModal(title, rows) {
-    const modal = document.getElementById("detailModal");
-    document.getElementById("modalTitle").innerText = title;
-
-    document.getElementById("modalBody").innerHTML =
-        rows.map(r => `
-            <div class="modal-item">
-                <strong>MR:</strong> ${r["MR No."]}<br>
-                <strong>Received:</strong> ${r["Received"]}<br>
-                <strong>Site:</strong> ${r["Site"]}
-            </div>
-        `).join("");
-
-    modal.classList.add("show");
-}
-
-function openP3Modal() {
-    const modal = document.getElementById("detailModal");
-    document.getElementById("modalTitle").innerText = "P3 Case – Detail";
-
-    document.getElementById("modalBody").innerHTML =
-        p3Data.map(r => `
-            <div class="modal-item">
-                📅 Received: ${r["Tgl Received"]}<br>
-                📍 Site: ${r["Site"]}<br>
-                #️⃣ MR No.: ${r["MR No."]}<br>
-                📦 Sent to WHS: ${r["Send to Warehouse"]}
-            </div>
-        `).join("");
-
-    modal.classList.add("show");
-}
-
-function openCashModal(list) {
-    const data = list.filter(r => r["Memo"].toLowerCase().includes("cash"));
-
-    openJobsheetModal("Cash On Site", data);
-}
-
-function openRepairModal(list) {
-    const data = list.filter(r => r["VCR"].toLowerCase().includes("repair"));
-
-    const petty = data.filter(r => r["Memo"].toLowerCase().includes("petty")).length;
-    const ho = data.filter(r => r["Memo"].toLowerCase().includes("dana ho")).length;
-
-    const modal = document.getElementById("detailModal");
-    document.getElementById("modalTitle").innerText = "Repair Breakdown";
-
-    document.getElementById("modalBody").innerHTML = `
-        <div class="modal-item"><strong>DANA HO BPN:</strong> ${ho}</div>
-        <div class="modal-item"><strong>PETTY CASH:</strong> ${petty}</div>
-    `;
-
-    modal.classList.add("show");
-}
-
-/*************************************************
- * P3 PIE CHART BY SITE
- *************************************************/
-function renderP3PieChart() {
     const map = {};
-
-    p3Data.forEach(r => {
-        const site = r["Site"];
-        if (!site) return;
+    data.forEach(r => {
+        const site = r["Site"] || "Unknown";
         map[site] = (map[site] || 0) + 1;
     });
 
-    const labels = Object.keys(map);
-    const values = Object.values(map);
+    if (p3Chart) p3Chart.destroy();
 
-    const ctx = document.getElementById("p3PieChart").getContext("2d");
-    if (p3PieChart) p3PieChart.destroy();
-
-    p3PieChart = new Chart(ctx, {
+    p3Chart = new Chart(ctx, {
         type: "pie",
         data: {
-            labels,
+            labels: Object.keys(map),
             datasets: [{
-                data: values,
-                backgroundColor: ["#b30000", "#ff5a5a", "#ff9999", "#660000"]
+                data: Object.values(map),
+                backgroundColor: ["#A60000", "#C10000", "#8A0000", "#660000", "#FF6666"]
             }]
-        },
-        options: {
-            plugins: {
-                legend: { position: "bottom" }
-            }
         }
     });
+}
+
+/* ----------------------------------------------------------
+   CARD CLICK EVENTS → OPEN MODAL
+---------------------------------------------------------- */
+document.getElementById("cardP1").addEventListener("click", () => openModalP1());
+document.getElementById("cardP2").addEventListener("click", () => openModalP2());
+document.getElementById("cardP3").addEventListener("click", () => openModalP3());
+
+document.getElementById("closeModal").addEventListener("click", () => {
+    document.getElementById("detailModal").classList.remove("active");
+});
+
+/* ----------------------------------------------------------
+   MODAL BUILDERS
+---------------------------------------------------------- */
+function openModalP1() {
+    let data = jobsheetData.filter(j => j["Category (P1,P2,P3/Ready Stock)"].includes("P1"));
+    let html = "";
+
+    data.forEach(j => {
+        html += `
+        <div class="modal-job">
+            <div class="modal-job-title">Job No. ${j["Job No."]}</div>
+            <div class="modal-label">HUB</div>
+            <div class="modal-value">${j["HUB"]}</div>
+
+            <div class="modal-label">WORK TO BE PERFORMED</div>
+            <div class="modal-value">${j["Work To Be Performed"]}</div>
+
+            <div class="modal-label">CATEGORY JOB</div>
+            <div class="modal-value">${j["Category (P1,P2,P3/Ready Stock)"]}</div>
+
+            <div class="modal-label">COST ESTIMATION</div>
+            <div class="modal-value">Rp ${j["Cost Estimation"] || 0}</div>
+        </div>`;
+    });
+
+    document.getElementById("modalTitle").innerText = `P1 Priority – Details (${data.length})`;
+    document.getElementById("modalBody").innerHTML = html;
+    document.getElementById("detailModal").classList.add("active");
+}
+
+function openModalP2() {
+    let html = "";
+
+    p2Data.forEach(r => {
+        html += `
+        <div class="modal-job">
+            <div class="modal-job-title">${r["TK NO"] || ""}</div>
+
+            <div class="modal-label">LOKASI</div>
+            <div class="modal-value">${r["LOKASI"] || ""}</div>
+
+            <div class="modal-label">TYPE UNIT</div>
+            <div class="modal-value">${r["TYPE UNIT"] || ""}</div>
+
+            <div class="modal-label">DATE RECEIVED P2</div>
+            <div class="modal-value">${r["Date Recived P2"] || ""}</div>
+
+            <div class="modal-label">NO. REGISTER</div>
+            <div class="modal-value">${r["NO. Register"] || ""}</div>
+
+            <div class="modal-label">PART NUMBER</div>
+            <div class="modal-value">${r["PART NUMBER"] || ""}</div>
+
+            <div class="modal-label">PART NAME</div>
+            <div class="modal-value">${r["PART NAME"] || ""}</div>
+
+            <div class="modal-label">QTY</div>
+            <div class="modal-value">${r["QTY"] || ""}</div>
+
+            <div class="modal-label">MR NO</div>
+            <div class="modal-value">${r["No. MR (Material Request)"] || ""}</div>
+
+            <div class="modal-label">SEND TO WHS</div>
+            <div class="modal-value">${r["Date Send to WHS"] || ""}</div>
+        </div>`;
+    });
+
+    document.getElementById("modalTitle").innerText = `P2 Priority – Details (${p2Data.length})`;
+    document.getElementById("modalBody").innerHTML = html;
+    document.getElementById("detailModal").classList.add("active");
+}
+
+function openModalP3() {
+    let html = "";
+
+    p3Data.forEach(r => {
+        html += `
+        <div class="modal-job">
+            <div class="modal-job-title">MR No. ${r["MR No."]}</div>
+
+            <div class="modal-label">RECEIVED</div>
+            <div class="modal-value">${r["Tgl Received"] || ""}</div>
+
+            <div class="modal-label">REGISTER</div>
+            <div class="modal-value">${r["Tgl Register"] || ""}</div>
+
+            <div class="modal-label">SITE</div>
+            <div class="modal-value">${r["Site"] || ""}</div>
+
+            <div class="modal-label">SEND TO WHS</div>
+            <div class="modal-value">${r["Send to Warehouse"] || ""}</div>
+        </div>`;
+    });
+
+    document.getElementById("modalTitle").innerText = `P3 – Details (${p3Data.length})`;
+    document.getElementById("modalBody").innerHTML = html;
+    document.getElementById("detailModal").classList.add("active");
 }
