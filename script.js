@@ -5,14 +5,19 @@ const API_URL =
   "https://script.google.com/macros/s/AKfycbxdX3eMLwH_zCC73FkUmVn40D2z1Fr5eJrutpTdGk00Wy3bLaer5--_5BOaE1Jf-q3owQ/exec";
 
 let assetData = [];
+let filteredAsset = [];
 let jobsheetData = [];
 
-/* FORMAT NUMBER */
+/* -----------------------------------------------------------
+      FORMAT NUMBER
+------------------------------------------------------------*/
 function formatNumber(num) {
   return Number(num || 0).toLocaleString("id-ID");
 }
 
-/* TIMESTAMP */
+/* -----------------------------------------------------------
+      TIMESTAMP
+------------------------------------------------------------*/
 function nowLabel() {
   const now = new Date();
   return now.toLocaleString("id-ID");
@@ -29,6 +34,7 @@ async function loadData() {
     const assetReq = await fetch(API_URL + "?action=asset");
     const assetJson = await assetReq.json();
     assetData = assetJson.data || [];
+    filteredAsset = assetData;
 
     // LOAD JOBSHEET
     const jsReq = await fetch(API_URL + "?action=jobsheet");
@@ -40,9 +46,11 @@ async function loadData() {
 
     document.getElementById("lastAssetUpdate").innerText = nowLabel();
 
-    renderAssetCards();
+    populateHubDropdown();
+    populateSiteDropdown(); // initial all sites
+    renderAssetCards(filteredAsset);
     renderJobsheetSummary();
-    renderAssetChart("status");
+    renderAssetChart("status", filteredAsset);
 
   } catch (err) {
     console.error("LOAD ERROR:", err);
@@ -52,12 +60,85 @@ async function loadData() {
 document.addEventListener("DOMContentLoaded", loadData);
 
 /* -----------------------------------------------------------
-   ASSET OVERVIEW LIST RENDER
+      POPULATE HUB DROPDOWN
 ------------------------------------------------------------*/
-function renderGroup(listId, totalId, key) {
+function populateHubDropdown() {
+  const hubSelect = document.getElementById("hubFilter");
+  hubSelect.innerHTML = `<option value="ALL">All HUBs</option>`;
+
+  const uniqueHubs = [...new Set(assetData.map((row) => row["HUB"] || "Unknown"))];
+
+  uniqueHubs.forEach((hub) => {
+    hubSelect.innerHTML += `<option value="${hub}">${hub}</option>`;
+  });
+}
+
+/* -----------------------------------------------------------
+      POPULATE SITE DROPDOWN (FOLLOW HUB)
+------------------------------------------------------------*/
+function populateSiteDropdown(selectedHub = "ALL") {
+  const siteSelect = document.getElementById("siteFilter");
+  siteSelect.innerHTML = `<option value="ALL">All Sites</option>`;
+
+  let filtered = assetData;
+
+  if (selectedHub !== "ALL") {
+    filtered = assetData.filter((r) => r["HUB"] === selectedHub);
+  }
+
+  const uniqueSites = [...new Set(filtered.map((row) => row["Alt Location"] || "Unknown"))];
+
+  uniqueSites.forEach((site) => {
+    siteSelect.innerHTML += `<option value="${site}">${site}</option>`;
+  });
+}
+
+/* UPDATE SITE WHEN HUB CHANGES */
+document.getElementById("hubFilter").addEventListener("change", function () {
+  const selectedHub = this.value;
+  populateSiteDropdown(selectedHub);
+});
+
+/* -----------------------------------------------------------
+      APPLY FILTER
+------------------------------------------------------------*/
+document.getElementById("applyAssetFilter").addEventListener("click", function () {
+  const hub = document.getElementById("hubFilter").value;
+  const site = document.getElementById("siteFilter").value;
+
+  filteredAsset = assetData.filter((row) => {
+    const matchHub = hub === "ALL" ? true : row["HUB"] === hub;
+    const matchSite = site === "ALL" ? true : row["Alt Location"] === site;
+    return matchHub && matchSite;
+  });
+
+  console.log("Filtered:", filteredAsset.length);
+
+  renderAssetCards(filteredAsset);
+  renderAssetChart("status", filteredAsset);
+});
+
+/* -----------------------------------------------------------
+      RESET FILTER
+------------------------------------------------------------*/
+document.getElementById("resetAssetFilter").addEventListener("click", function () {
+  filteredAsset = assetData;
+
+  document.getElementById("hubFilter").value = "ALL";
+  populateSiteDropdown("ALL");
+  document.getElementById("siteFilter").value = "ALL";
+
+  renderAssetCards(filteredAsset);
+  renderAssetChart("status", filteredAsset);
+});
+
+/* -----------------------------------------------------------
+      RENDER GROUP LIST CARD
+------------------------------------------------------------*/
+function renderGroup(listId, totalId, key, data) {
   const map = {};
 
-  assetData.forEach((row) => {
+  data.forEach((row) => {
     const val = row[key] || "Unknown";
     map[val] = (map[val] || 0) + 1;
   });
@@ -65,7 +146,7 @@ function renderGroup(listId, totalId, key) {
   const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
 
   document.getElementById(totalId).innerText =
-    formatNumber(assetData.length) + " Units";
+    formatNumber(data.length) + " Units";
 
   let html = "";
   sorted.forEach(([name, count]) => {
@@ -79,16 +160,16 @@ function renderGroup(listId, totalId, key) {
   document.getElementById(listId).innerHTML = html;
 }
 
-function renderAssetCards() {
-  renderGroup("statusUnitList", "statusUnitTotal", "Status");
-  renderGroup("customerList", "customerTotal", "Customer");
-  renderGroup("locationList", "locationTotal", "Location");
-  renderGroup("yearList", "yearTotal", "Year");
-  renderGroup("vehicleList", "vehicleTotal", "VehicleType");
+function renderAssetCards(data) {
+  renderGroup("statusUnitList", "statusUnitTotal", "Status Unit 1", data);
+  renderGroup("customerList", "customerTotal", "Customer", data);
+  renderGroup("locationList", "locationTotal", "Alt Location", data);
+  renderGroup("yearList", "yearTotal", "Year", data);
+  renderGroup("vehicleList", "vehicleTotal", "Vehicle Type", data);
 }
 
 /* -----------------------------------------------------------
-      JOBSHEET SUMMARY RENDER
+      JOBSHEET SUMMARY
 ------------------------------------------------------------*/
 function renderJobsheetSummary() {
   function countContains(col, str) {
@@ -103,9 +184,7 @@ function renderJobsheetSummary() {
   const totalCost = jobsheetData.reduce((sum, x) => {
     return (
       sum +
-      (Number(
-        String(x["Cost Estimation"]).replace(/[^\d]/g, "")
-      ) || 0)
+      (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0)
     );
   }, 0);
 
@@ -121,17 +200,19 @@ function renderJobsheetSummary() {
 ------------------------------------------------------------*/
 let assetChart;
 
-function renderAssetChart(type) {
-  const key = {
-    status: "Status",
+function renderAssetChart(type, data) {
+  const keyMap = {
+    status: "Status Unit 1",
     customer: "Customer",
-    location: "Location",
-    vehicle: "VehicleType",
+    location: "Alt Location",
+    vehicle: "Vehicle Type",
     year: "Year"
-  }[type];
+  };
+
+  const key = keyMap[type];
 
   const map = {};
-  assetData.forEach((r) => {
+  data.forEach((r) => {
     const v = r[key] || "Unknown";
     map[v] = (map[v] || 0) + 1;
   });
@@ -166,5 +247,5 @@ function renderAssetChart(type) {
 }
 
 document.getElementById("chartSelector").addEventListener("change", (e) => {
-  renderAssetChart(e.target.value);
+  renderAssetChart(e.target.value, filteredAsset);
 });
