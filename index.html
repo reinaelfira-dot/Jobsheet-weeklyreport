@@ -27,7 +27,7 @@
     <p class="text-center text-lg mt-2 opacity-90">Real-time Asset & Jobsheet Monitoring System</p>
 </section>
 
-<!-- GLOBAL POPUPS -->
+<!-- CONNECTION + LOADED BADGES -->
 <div id="connectionStatus" class="connection-badge hidden">
     <span class="dot"></span> Connecting...
 </div>
@@ -102,7 +102,7 @@
         </div>
     </div>
 
-    <!-- VEHICLE TYPE -->
+    <!-- VEHICLE -->
     <div class="grid grid-cols-1 mt-6">
         <div class="canva-card scroll-card">
             <div class="card-title">🚗 Vehicle Type</div>
@@ -112,7 +112,7 @@
     </div>
 </div>
 
-<!-- ASSET CHART BELOW ASSET OVERVIEW (REQUESTED) -->
+<!-- ASSET CHART -->
 <div class="wrapper mt-10">
     <div class="canva-card">
         <div class="card-title mb-3">📊 ASSET DISTRIBUTION</div>
@@ -131,6 +131,7 @@
 
 <!-- JOBSHEET OVERVIEW -->
 <div class="wrapper mt-12">
+
     <div class="canva-card">
         <div class="flex items-center gap-2 text-xl font-bold">📑 JOBSHEET OVERVIEW</div>
         <p class="text-gray-600">Maintenance and repair job tracking system</p>
@@ -158,8 +159,9 @@
         </div>
     </div>
 
-    <!-- JOBSHEET SUMMARY CARDS -->
+    <!-- SUMMARY CARDS -->
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+
         <div id="cardP1" class="summary-card clickable">
             <div class="summary-title">P1 PRIORITY</div>
             <div id="p1Count" class="summary-value">0</div>
@@ -173,7 +175,7 @@
         </div>
 
         <div id="cardP3" class="summary-card clickable">
-            <div class="summary-title">P3 CASE</div>
+            <div class="summary-title">P3</div>
             <div id="p3Count" class="summary-value">0</div>
             <div class="summary-sub">Special Cases</div>
         </div>
@@ -187,18 +189,18 @@
         <div id="cardRepair" class="summary-card clickable">
             <div class="summary-title">REPAIR</div>
             <div id="repairCount" class="summary-value">0</div>
-            <div class="summary-sub">Repairs Summary</div>
+            <div class="summary-sub">Repair Jobs</div>
         </div>
     </div>
 
-    <!-- JOBSHEET CHART -->
+    <!-- P3 PIE CHART -->
     <div class="canva-card mt-10">
         <h3 class="card-title">📊 P3 Distribution by Site</h3>
         <canvas id="p3PieChart" height="200"></canvas>
     </div>
 </div>
 
-<!-- MODAL DETAIL -->
+<!-- MODAL -->
 <div id="detailModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -209,7 +211,7 @@
     </div>
 </div>
 
-<!-- SCRIPTS -->
+<!-- SCRIPT -->
 <script src="script.js"></script>
 
 </body>
