@@ -7,6 +7,7 @@ const API_URL =
 let assetData = [];
 let jobsheetData = [];
 let assetChart = null;
+let assetChartLarge = null;
 
 /* -----------------------------------------------------------
       FORMATTER
@@ -14,13 +15,12 @@ let assetChart = null;
 function formatNumber(num) {
   return Number(num || 0).toLocaleString("id-ID");
 }
-
 function nowLabel() {
   return new Date().toLocaleString("id-ID");
 }
 
 /* -----------------------------------------------------------
-      LOADING UI
+      LOADER UI
 ------------------------------------------------------------*/
 function showConnection(status = "connecting") {
   const box = document.getElementById("connectionStatus");
@@ -39,10 +39,7 @@ function showLoadedSummary(text) {
   document.getElementById("loadedMessage").innerText = text;
 
   box.classList.remove("hidden");
-
-  setTimeout(() => {
-    box.classList.add("hidden");
-  }, 5000);
+  setTimeout(() => box.classList.add("hidden"), 5000);
 }
 
 function showCardLoading() {
@@ -57,27 +54,26 @@ function showCardLoading() {
   ids.forEach(id => {
     document.getElementById(id).innerHTML = `
       <div class="card-loading">
-        <div class="loader"></div>
-        <p>Loading data...</p>
-      </div>
-    `;
+          <div class="loader"></div>
+          <p>Loading data...</p>
+      </div>`;
   });
 }
 
 /* -----------------------------------------------------------
       LOAD DATA
 ------------------------------------------------------------*/
+document.addEventListener("DOMContentLoaded", loadData);
+
 async function loadData() {
   showConnection("connecting");
   showCardLoading();
 
   try {
-    // LOAD ASSETS
     const assetReq = await fetch(API_URL + "?action=asset");
     const assetJson = await assetReq.json();
     assetData = assetJson.data || [];
 
-    // LOAD JOBSHEET
     const jsReq = await fetch(API_URL + "?action=jobsheet");
     const jsJson = await jsReq.json();
     jobsheetData = jsJson.data || [];
@@ -85,12 +81,12 @@ async function loadData() {
     document.getElementById("lastAssetUpdate").innerText = nowLabel();
 
     populateHubFilter();
-    renderAssetCards();
+    renderAssetCards(assetData);
     renderJobsheetSummary();
-    renderAssetChart("status");
+    renderAssetChart("status", assetData);
+    renderLargeAssetChart("year", assetData);
 
     showConnection("hide");
-
     showLoadedSummary(
       `Data loaded: ${assetData.length} assets, ${jobsheetData.length} jobsheets`
     );
@@ -101,97 +97,112 @@ async function loadData() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadData);
-
 /* -----------------------------------------------------------
-      FILTER HANDLING (HUB → SITE)
+      HUB → SITE FILTER
 ------------------------------------------------------------*/
 function populateHubFilter() {
   const hubs = [...new Set(assetData.map(a => a["HUB"] || "Unknown"))].sort();
-  const hubFilter = document.getElementById("hubFilter");
-
-  hubFilter.innerHTML = `<option value="ALL">All HUBs</option>` +
+  document.getElementById("hubFilter").innerHTML =
+    `<option value="ALL">All HUBs</option>` +
     hubs.map(h => `<option value="${h}">${h}</option>`).join("");
 
   populateSiteFilter("ALL");
 }
 
 function populateSiteFilter(selectedHub) {
-  let filtered = assetData;
-
-  if (selectedHub !== "ALL") {
-    filtered = assetData.filter(a => a["HUB"] === selectedHub);
-  }
+  let filtered = selectedHub === "ALL"
+    ? assetData
+    : assetData.filter(a => a["HUB"] === selectedHub);
 
   const sites = [...new Set(filtered.map(a => a["Alt Location"] || "Unknown"))].sort();
 
-  const siteFilter = document.getElementById("siteFilter");
-  siteFilter.innerHTML =
+  document.getElementById("siteFilter").innerHTML =
     `<option value="ALL">All Sites</option>` +
     sites.map(s => `<option value="${s}">${s}</option>`).join("");
 }
 
-document.getElementById("hubFilter").addEventListener("change", (e) => {
+document.getElementById("hubFilter").addEventListener("change", e => {
   populateSiteFilter(e.target.value);
 });
 
 /* -----------------------------------------------------------
-      APPLY FILTER
+      FILTER BUTTONS
 ------------------------------------------------------------*/
 document.getElementById("applyAssetFilter").addEventListener("click", () => {
   const hub = document.getElementById("hubFilter").value;
   const site = document.getElementById("siteFilter").value;
 
   let filtered = assetData;
-
   if (hub !== "ALL") filtered = filtered.filter(r => r["HUB"] === hub);
   if (site !== "ALL") filtered = filtered.filter(r => r["Alt Location"] === site);
 
   renderAssetCards(filtered);
   renderAssetChart("status", filtered);
+  renderLargeAssetChart("year", filtered);
 });
 
 document.getElementById("resetAssetFilter").addEventListener("click", () => {
   document.getElementById("hubFilter").value = "ALL";
   populateSiteFilter("ALL");
+
   renderAssetCards(assetData);
   renderAssetChart("status", assetData);
+  renderLargeAssetChart("year", assetData);
 });
 
 /* -----------------------------------------------------------
-   RENDER GROUP (Status, Customer, Location, Year, Vehicle)
+      RENDER CARD LISTS
 ------------------------------------------------------------*/
-function renderGroup(listId, totalId, key, dataset = assetData) {
-  const map = {};
-
-  dataset.forEach((row) => {
-    const val = row[key] || "Unknown";
-    map[val] = (map[val] || 0) + 1;
-  });
-
-  const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
-
-  document.getElementById(totalId).innerText =
-    formatNumber(dataset.length) + " Units";
-
-  let html = "";
-  sorted.forEach(([name, count]) => {
-    html += `
-      <div class="list-item">
-          <span>${name}</span>
-          <span class="item-badge">${formatNumber(count)}</span>
-      </div>`;
-  });
-
-  document.getElementById(listId).innerHTML = html;
+function getTK(row) {
+  return row["TK No."] || row["TK No"] || row["TK"] || "";
 }
 
-function renderAssetCards(dataset = assetData) {
-  renderGroup("statusUnitList", "statusUnitTotal", "Status Unit 3", dataset);
-  renderGroup("customerList", "customerTotal", "Customer", dataset);
-  renderGroup("locationList", "locationTotal", "Alt Location", dataset);
-  renderGroup("yearList", "yearTotal", "Year", dataset);
-  renderGroup("vehicleList", "vehicleTotal", "Vehicle Type", dataset);
+function openDetailModal(title, tkList) {
+  const modal = document.getElementById("detailModal");
+  document.getElementById("modalTitle").innerText = title;
+
+  const body = document.getElementById("modalBody");
+  body.innerHTML = tkList
+    .map(t => `<div class="modal-item">${t}</div>`)
+    .join("");
+
+  modal.classList.add("show");
+}
+
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("detailModal").classList.remove("show");
+});
+
+function renderGroup(listId, totalId, key, labelTitle, dataset) {
+  const groupMap = {};
+
+  dataset.forEach(r => {
+    const k = r[key] || "Unknown";
+    if (!groupMap[k]) groupMap[k] = { count: 0, tk: [] };
+    groupMap[k].count++;
+    groupMap[k].tk.push(getTK(r));
+  });
+
+  const sorted = Object.entries(groupMap).sort((a, b) => b[1].count - a[1].count);
+
+  document.getElementById(totalId).innerText = formatNumber(dataset.length) + " Units";
+
+  document.getElementById(listId).innerHTML = sorted
+    .map(([name, obj]) => `
+      <div class="list-item clickable" 
+           onclick='openDetailModal("${labelTitle}: ${name}", ${JSON.stringify(obj.tk)})'>
+          <span>${name}</span>
+          <span class="item-badge">${formatNumber(obj.count)}</span>
+      </div>`)
+    .join("");
+}
+
+function renderAssetCards(dataset) {
+  renderGroup("statusUnitList", "statusUnitTotal", "Status Unit 3", "Status Unit", dataset);
+  renderGroup("customerList", "customerTotal", "Customer", "Customer", dataset);
+  renderGroup("locationList", "locationTotal", "Alt Location", "Location", dataset);
+  renderGroup("yearList", "yearTotal", "Year", "Year", dataset);
+  renderGroup("vehicleList", "vehicleTotal", "Vehicle Type", "Vehicle Type", dataset);
 }
 
 /* -----------------------------------------------------------
@@ -199,42 +210,42 @@ function renderAssetCards(dataset = assetData) {
 ------------------------------------------------------------*/
 function renderJobsheetSummary() {
   function countContains(col, str) {
-    return jobsheetData.filter((x) => x[col]?.toLowerCase().includes(str)).length;
+    return jobsheetData.filter(x => x[col]?.toLowerCase().includes(str)).length;
   }
 
-  const p1 = countContains("Category (P1,P2,P3/Ready Stock)", "p1");
-  const p2 = countContains("Category (P1,P2,P3/Ready Stock)", "p2");
-  const cash = countContains("Memo", "cash");
-  const repair = countContains("VCR", "repair");
+  document.getElementById("p1CountJS").innerText =
+    countContains("Category (P1,P2,P3/Ready Stock)", "p1");
 
-  const totalCost = jobsheetData.reduce((sum, x) => {
-    return (
-      sum +
-      (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0)
-    );
-  }, 0);
+  document.getElementById("p2CountJS").innerText =
+    countContains("Category (P1,P2,P3/Ready Stock)", "p2");
 
-  document.getElementById("p1CountJS").innerText = p1;
-  document.getElementById("p2CountJS").innerText = p2;
-  document.getElementById("cashCountJS").innerText = cash;
-  document.getElementById("repairCountJS").innerText = repair;
+  document.getElementById("cashCountJS").innerText =
+    countContains("Memo", "cash");
+
+  document.getElementById("repairCountJS").innerText =
+    countContains("VCR", "repair");
+
+  const totalCost = jobsheetData.reduce((sum, x) =>
+    sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0), 0);
+
   document.getElementById("totalCostJS").innerText = "Rp " + formatNumber(totalCost);
 }
 
 /* -----------------------------------------------------------
-      CHART RENDER
+      SMALL CHART (CARD)
 ------------------------------------------------------------*/
 function renderAssetChart(type, dataset = assetData) {
-  const key = {
+  const keyMap = {
     status: "Status Unit 3",
     customer: "Customer",
     location: "Alt Location",
     vehicle: "Vehicle Type",
     year: "Year"
-  }[type];
+  };
 
+  const key = keyMap[type];
   const map = {};
-  dataset.forEach((r) => {
+  dataset.forEach(r => {
     const v = r[key] || "Unknown";
     map[v] = (map[v] || 0) + 1;
   });
@@ -254,18 +265,83 @@ function renderAssetChart(type, dataset = assetData) {
           label: "Units",
           data: values,
           backgroundColor: "#A60000",
-          borderRadius: 10,
-        },
-      ],
+          borderRadius: 10
+        }
+      ]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true } },
-    },
+      scales: { y: { beginAtZero: true } }
+    }
   });
 }
 
-document.getElementById("chartSelector").addEventListener("change", (e) => {
-  renderAssetChart(e.target.value);
+document.getElementById("chartSelector").addEventListener("change", e => {
+  renderAssetChart(e.target.value, assetData);
 });
+
+/* -----------------------------------------------------------
+      LARGE CHART (SECTION B)
+------------------------------------------------------------*/
+document.getElementById("assetChartSelector").addEventListener("change", e => {
+  renderLargeAssetChart(e.target.value, assetData);
+});
+
+function renderLargeAssetChart(type = "year", dataset = assetData) {
+  const keys = {
+    year: "Year",
+    status: "Status Unit 3",
+    customer: "Customer",
+    location: "Alt Location",
+    vehicle: "Vehicle Type"
+  };
+
+  const key = keys[type];
+  const map = {};
+
+  dataset.forEach(r => {
+    const v = r[key] || "Unknown";
+    map[v] = (map[v] || 0) + 1;
+  });
+
+  const labels = Object.keys(map);
+  const values = Object.values(map);
+  const total = values.reduce((a,b)=>a+b,0);
+
+  const ctx = document.getElementById("assetChartLarge").getContext("2d");
+  if (assetChartLarge) assetChartLarge.destroy();
+
+  assetChartLarge = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Units",
+        data: values,
+        backgroundColor: "#b30000",
+        borderRadius: 12
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              let val = ctx.raw;
+              let pct = ((val / total) * 100).toFixed(1);
+              return `${val} units (${pct}%)`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  document.getElementById("chartTitle").innerText =
+    type.charAt(0).toUpperCase() + type.slice(1) + " Distribution";
+}
