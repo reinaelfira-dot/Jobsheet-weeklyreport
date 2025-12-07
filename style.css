@@ -7,7 +7,7 @@ body {
 
 /* Wrapper */
 .wrapper {
-    max-width: 1050px;
+    max-width: 1100px;
     margin: 40px auto;
     padding: 0 15px;
 }
@@ -31,6 +31,9 @@ ul, li {
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* ================================
@@ -42,6 +45,7 @@ ul, li {
     border-radius: 10px;
     border: 2px solid #a60000;
     outline: none;
+    background: white;
 }
 
 .canva-input:focus {
@@ -62,6 +66,11 @@ ul, li {
     padding: 12px 22px;
     border-radius: 10px;
     font-weight: 600;
+    transition: 0.2s;
+}
+
+.canva-btn-primary:hover {
+    background: #7a0000;
 }
 
 .canva-btn-outline {
@@ -70,6 +79,12 @@ ul, li {
     border: 2px solid #a60000;
     color: #a60000;
     font-weight: 600;
+    transition: 0.2s;
+}
+
+.canva-btn-outline:hover {
+    background: #a60000;
+    color: white;
 }
 
 /* ================================
@@ -226,7 +241,7 @@ ul, li {
 }
 
 /* ================================
-   Modal: TK Number Detail
+   Modal Styling
 ================================ */
 .modal-overlay {
     position: fixed;
@@ -313,6 +328,7 @@ ul, li {
     font-size: 24px;
     font-weight: 700;
     color: #222;
+    margin-bottom: 4px;
 }
 
 .chart-subtitle {
@@ -324,6 +340,7 @@ ul, li {
 .chart-label {
     font-size: 14px;
     font-weight: 600;
+    display: block;
     margin-bottom: 8px;
 }
 
@@ -332,4 +349,9 @@ ul, li {
     padding: 12px;
     border-radius: 10px;
     border: 2px solid #a60000;
+    background: white;
 }
+
+/* ================================
+   END OF FILE
+================================ */
