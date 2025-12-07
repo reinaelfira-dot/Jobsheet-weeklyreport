@@ -15,6 +15,9 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- Font Awesome (untuk icon chart) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <!-- Custom CSS -->
 <link rel="stylesheet" href="style.css">
 </head>
@@ -57,6 +60,7 @@
 
     <!-- FILTER ASSET -->
     <div class="canva-card mt-6">
+
         <h3 class="text-xl font-bold flex items-center gap-2 mb-3">🔍 Filter Asset Data</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -82,6 +86,7 @@
                 <span id="lastAssetUpdate">-</span>
             </div>
         </div>
+
     </div>
 
     <!-- STATUS UNIT + CUSTOMER -->
@@ -180,7 +185,9 @@
 <section class="chart-section wrapper mt-10">
 
     <div class="chart-card">
-        <h2 class="chart-title">📊 ASSET CHARTS</h2>
+        <h2 class="chart-title">
+            <i class="fa-solid fa-chart-column"></i> ASSET CHARTS
+        </h2>
         <p class="chart-subtitle">Visual analysis of asset distribution</p>
     </div>
 
@@ -213,7 +220,7 @@
 </div>
 
 
-<!-- JS -->
+<!-- JS SCRIPT (HARUS SELALU TERAKHIR) -->
 <script src="script.js"></script>
 
 </body>
