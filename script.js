@@ -6,6 +6,7 @@ const API_URL =
 
 let assetData = [];
 let jobsheetData = [];
+let assetChart = null;
 
 /* -----------------------------------------------------------
       FORMATTER
@@ -19,7 +20,7 @@ function nowLabel() {
 }
 
 /* -----------------------------------------------------------
-      LOADER UI FUNCTIONS
+      LOADING UI
 ------------------------------------------------------------*/
 function showConnection(status = "connecting") {
   const box = document.getElementById("connectionStatus");
@@ -36,6 +37,7 @@ function showConnection(status = "connecting") {
 function showLoadedSummary(text) {
   const box = document.getElementById("loadedSummary");
   document.getElementById("loadedMessage").innerText = text;
+
   box.classList.remove("hidden");
 
   setTimeout(() => {
@@ -63,15 +65,13 @@ function showCardLoading() {
 }
 
 /* -----------------------------------------------------------
-      LOAD DATA (ASSET + JOBSHEET)
+      LOAD DATA
 ------------------------------------------------------------*/
 async function loadData() {
   showConnection("connecting");
   showCardLoading();
 
   try {
-    console.log("Loading data...");
-
     // LOAD ASSETS
     const assetReq = await fetch(API_URL + "?action=asset");
     const assetJson = await assetReq.json();
@@ -84,13 +84,11 @@ async function loadData() {
 
     document.getElementById("lastAssetUpdate").innerText = nowLabel();
 
-    // INIT FILTERS AND DISPLAY
     populateHubFilter();
-    renderAssetCards(assetData);
+    renderAssetCards();
     renderJobsheetSummary();
-    renderAssetChart("status", assetData);
+    renderAssetChart("status");
 
-    // FINISH LOADING
     showConnection("hide");
 
     showLoadedSummary(
@@ -110,10 +108,9 @@ document.addEventListener("DOMContentLoaded", loadData);
 ------------------------------------------------------------*/
 function populateHubFilter() {
   const hubs = [...new Set(assetData.map(a => a["HUB"] || "Unknown"))].sort();
-
   const hubFilter = document.getElementById("hubFilter");
-  hubFilter.innerHTML =
-    `<option value="ALL">All HUBs</option>` +
+
+  hubFilter.innerHTML = `<option value="ALL">All HUBs</option>` +
     hubs.map(h => `<option value="${h}">${h}</option>`).join("");
 
   populateSiteFilter("ALL");
@@ -134,7 +131,7 @@ function populateSiteFilter(selectedHub) {
     sites.map(s => `<option value="${s}">${s}</option>`).join("");
 }
 
-document.getElementById("hubFilter").addEventListener("change", e => {
+document.getElementById("hubFilter").addEventListener("change", (e) => {
   populateSiteFilter(e.target.value);
 });
 
@@ -157,18 +154,17 @@ document.getElementById("applyAssetFilter").addEventListener("click", () => {
 document.getElementById("resetAssetFilter").addEventListener("click", () => {
   document.getElementById("hubFilter").value = "ALL";
   populateSiteFilter("ALL");
-
   renderAssetCards(assetData);
   renderAssetChart("status", assetData);
 });
 
 /* -----------------------------------------------------------
-   ASSET OVERVIEW LIST RENDER
+   RENDER GROUP (Status, Customer, Location, Year, Vehicle)
 ------------------------------------------------------------*/
 function renderGroup(listId, totalId, key, dataset = assetData) {
   const map = {};
 
-  dataset.forEach(row => {
+  dataset.forEach((row) => {
     const val = row[key] || "Unknown";
     map[val] = (map[val] || 0) + 1;
   });
@@ -182,8 +178,8 @@ function renderGroup(listId, totalId, key, dataset = assetData) {
   sorted.forEach(([name, count]) => {
     html += `
       <div class="list-item">
-        <span>${name}</span>
-        <span class="item-badge">${formatNumber(count)}</span>
+          <span>${name}</span>
+          <span class="item-badge">${formatNumber(count)}</span>
       </div>`;
   });
 
@@ -199,11 +195,11 @@ function renderAssetCards(dataset = assetData) {
 }
 
 /* -----------------------------------------------------------
-      JOBSHEET SUMMARY RENDER
+      JOBSHEET SUMMARY
 ------------------------------------------------------------*/
 function renderJobsheetSummary() {
   function countContains(col, str) {
-    return jobsheetData.filter(x => x[col]?.toLowerCase().includes(str)).length;
+    return jobsheetData.filter((x) => x[col]?.toLowerCase().includes(str)).length;
   }
 
   const p1 = countContains("Category (P1,P2,P3/Ready Stock)", "p1");
@@ -212,7 +208,10 @@ function renderJobsheetSummary() {
   const repair = countContains("VCR", "repair");
 
   const totalCost = jobsheetData.reduce((sum, x) => {
-    return sum + (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0);
+    return (
+      sum +
+      (Number(String(x["Cost Estimation"]).replace(/[^\d]/g, "")) || 0)
+    );
   }, 0);
 
   document.getElementById("p1CountJS").innerText = p1;
@@ -223,23 +222,19 @@ function renderJobsheetSummary() {
 }
 
 /* -----------------------------------------------------------
-      BAR CHART
+      CHART RENDER
 ------------------------------------------------------------*/
-let assetChart;
-
 function renderAssetChart(type, dataset = assetData) {
-  const keyMap = {
+  const key = {
     status: "Status Unit 3",
     customer: "Customer",
     location: "Alt Location",
     vehicle: "Vehicle Type",
     year: "Year"
-  };
+  }[type];
 
-  const key = keyMap[type];
   const map = {};
-
-  dataset.forEach(r => {
+  dataset.forEach((r) => {
     const v = r[key] || "Unknown";
     map[v] = (map[v] || 0) + 1;
   });
@@ -248,7 +243,6 @@ function renderAssetChart(type, dataset = assetData) {
   const values = Object.values(map);
 
   const ctx = document.getElementById("assetChart").getContext("2d");
-
   if (assetChart) assetChart.destroy();
 
   assetChart = new Chart(ctx, {
@@ -260,18 +254,18 @@ function renderAssetChart(type, dataset = assetData) {
           label: "Units",
           data: values,
           backgroundColor: "#A60000",
-          borderRadius: 10
-        }
-      ]
+          borderRadius: 10,
+        },
+      ],
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true } }
-    }
+      scales: { y: { beginAtZero: true } },
+    },
   });
 }
 
-document.getElementById("chartSelector").addEventListener("change", e => {
+document.getElementById("chartSelector").addEventListener("change", (e) => {
   renderAssetChart(e.target.value);
 });
